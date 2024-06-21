@@ -1,0 +1,42 @@
+
+```{r, include = FALSE}
+library(tidyverse)
+library(janitor)
+library(dplyr)
+library(reshape2)
+
+```
+
+### Data Reading and Viewing
+```{r}
+csv <- "analyticdata2024 - clean_data.csv"
+
+mental <- read.csv(csv, header = TRUE)
+
+### Clean data columns
+mental %>% clean_names()
+
+### Overview of data as a whole
+mental %>% glimpse()
+```
+
+### Filtering in relavent correlations of variables to cutoff from large features
+```{r}
+mental_filtered <- mental %>% select(where(is.numeric))
+
+correlations <- cor(mental_filtered) 
+
+correlations <- melt(correlations, na.rm = TRUE)
+
+corr_unique <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter( (value > 0.70 & value < 1) | value < -0.70)
+
+```
+
+### View Table of relavent filtered correlations:
+```{r, include=FALSE}
+corr_unique
+```
+
+
+
+
