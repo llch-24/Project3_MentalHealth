@@ -20,7 +20,7 @@ mental %>% clean_names()
 mental %>% glimpse()
 ```
 
-### Filtering in relavent correlations of variables to cutoff from large features
+### Filtering in relavent correlations between FEATURES Themselves and using a cutoff
 ```{r}
 mental_filtered <- mental %>% select(where(is.numeric))
 
@@ -28,15 +28,24 @@ correlations <- cor(mental_filtered)
 
 correlations <- melt(correlations, na.rm = TRUE)
 
-corr_unique <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter( (value > 0.70 & value < 1) | value < -0.70)
+cor_feature <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter( (value > 0.70 & value < 1) | value < -0.70)
 
 ```
 
-### View Table of relavent filtered correlations:
+### View Table of relavent correlations between FEATURES:
 ```{r, include=FALSE}
-corr_unique
+cor_feature
 ```
 
+### Filtering in relavent correlations between RESPONSE and Features Themselves and using a cutoff
+```{r}
 
+cor_response <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter(Var2 == "Poor.Mental.Health.Days.raw.value")
 
+```
+
+### View Table of relavent correlations between RESPONSE and Feature:
+```{r, include=FALSE}
+cor_response
+```
 
