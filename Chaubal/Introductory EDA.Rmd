@@ -1,0 +1,22 @@
+---
+title: "Urvi Introductory EDA"
+output: html_document
+date: "2024-06-21"
+---
+
+```{r}
+# install.packages("janitor")
+library(janitor)
+library(ggplot2)
+library(maps)
+
+data <- analyticdata2024_clean_data |>
+  clean_names()
+
+```
+
+
+```{r}
+
+
+```
