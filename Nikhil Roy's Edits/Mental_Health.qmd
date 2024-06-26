@@ -49,3 +49,172 @@ cor_response <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter(Va
 cor_response
 ```
 
+### Correlation HeatMap For feature matrix:
+```{r}
+library(ggcorrplot)
+
+cor_matrix <- cor(mental_filtered)
+
+# Filter the correlation matrix to include only the significant correlations
+cor_matrix_filtered <- cor_matrix
+cor_matrix_filtered[abs(cor_matrix_filtered) < 0.70 | abs(cor_matrix_filtered) >= 1] <- NA
+
+# Visualize the correlation matrix using ggcorrplot
+ggcorrplot(cor_matrix_filtered, type = "lower", lab = TRUE)
+
+```
+### Model 1
+```{r}
+mod1 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+             (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value * Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value * Frequent.Mental.Distress.raw.value) + (Population.raw.value * Food.Insecurity.numerator)
+             
+             , data = mental)
+
+mod1 %>% broom::glance()
+
+#mod1$terms
+
+#summary(mod1)
+```
+```{r}
+#car:: vif(mod1)
+```
+
+
+
+
+### Model 2
+```{r}
+mod2 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+             (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value) + (Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value) + Frequent.Mental.Distress.raw.value + (Population.raw.value * Food.Insecurity.numerator)
+             
+             , data = mental)
+
+broom::glance(mod2)
+```
+```{r}
+summary(mod2)
+```
+
+```{r}
+library(ggfortify)
+autoplot(mod2, ncol = 4)
+```
+
+### Model 3
+```{r}
+mod3 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+             (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value) + (Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value) + Frequent.Mental.Distress.raw.value + (Population.raw.value * Food.Insecurity.numerator)
+             
+             , data = mental)
+
+broom::glance(mod3)
+```
+```{r}
+library(ggfortify)
+autoplot(mod3, ncol = 4)
+```
+```{r}
+coefplot::coefplot(mod3, intercept = FALSE)
+```
+### Model 4:
+
+```{r}
+mod4 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+             (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value) + (Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value) + Frequent.Mental.Distress.raw.value
+             
+             , data = mental)
+
+broom::glance(mod4)
+
+
+#summary(mod4)
+```
+### Model 5
+```{r}
+mod5 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Food.Insecurity.raw.value
+             
+             , data = mental)
+
+mod5 %>% broom::glance()
+
+#mod1$terms
+
+#summary(mod5)
+```
+### Model 6
+```{r}
+mod6 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
+
+             
+             , data = mental)
+
+mod6 %>% broom::glance()
+
+#mod1$terms
+
+#summary(mod6)
+```
+```{r}
+summary(mod6)
+```
+
+### Model 7 -> includes high correlated repsonses and New negative correlations
+
+```{r}
+### Model 7
+mod7 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value
+
+
+
+             
+             , data = mental)
+
+mod7 %>% broom::glance()
+
+#mod1$terms
+
+#summary(mod6)
+```
+
+```{r}
+car::vif(mod7)
+```
+### Model 8 -> include interactive terms to help further reduce BIC and increase adjusted R^2
+
+```{r}
+### Model 8
+mod8 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value + Poor.Physical.Health.Days.raw.value + Poor.or.Fair.Health.raw.value
+
+             , data = mental)
+
+mod8 %>% broom::glance()
+
+```
+```{r}
+summary(mod8)
+```
+
+```{r}
+library(ggfortify)
+autoplot(mod8, ncol = 4)
+```
+
+```{r}
+mental |>
+  mutate(Mental_Health_Days_predicted_vals = predict(mod8)) |> 
+  ggplot(aes(x = Mental_Health_Days_predicted_vals, y = Poor.Mental.Health.Days.raw.value)) +
+  geom_point(alpha = 0.2, size = 2, color = 'darkblue') +
+  geom_abline(slope = 1, intercept = 0, 
+              linetype = "dashed",
+              color = "gold2",
+              linewidth = 2) +
+  labs(y = "Actual Mental Health Days",
+       x = "Mental Health Days Predicted Values")
+      
+  
+
+```
+
+
+
