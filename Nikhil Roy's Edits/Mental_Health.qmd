@@ -8,7 +8,7 @@ library(reshape2)
 
 ### Data Reading and Viewing
 
-```{r}
+```{r,include = FALSE}
 csv <- "analyticdata2024 - clean_data.csv"
 
 mental <- read.csv(csv, header = TRUE)
@@ -521,6 +521,16 @@ summary/signifigance:
 ```{r}
 summary(mod7)
 ```
+
+
+
+
+
+
+
+
+
+
 
 
 

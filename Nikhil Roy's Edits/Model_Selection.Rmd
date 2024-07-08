@@ -1,0 +1,174 @@
+
+```{r, include = FALSE}
+library(caret)
+library(tidyverse)
+library(janitor)
+```
+
+### Get the specific data for Arkansas since it has the biggest data amongst the other 2 states:
+
+```{r, include = FALSE}
+csv <- "analyticdata2024 - clean_data.csv"
+
+mental <- read.csv(csv, header = TRUE)
+
+### Clean data columns
+mental %>% clean_names()
+
+arkansas <- mental %>% filter(State.Abbreviation == "AR" & !Name == "Arkansas") 
+arkansas
+```
+
+Correlation Matrices for the features and response themselves:
+```{r}
+arkansas_filtered <- arkansas %>% select(where(is.numeric))
+
+cor_matrix <- cor(arkansas_filtered)
+
+correlations <- reshape2:: melt(cor_matrix, na.rm = TRUE)
+
+cor_feature <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter( (value > 0.70 & value < 1) | value < -0.70)
+
+
+cor_response <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter(Var2 == "Poor.Mental.Health.Days.raw.value")
+
+
+```
+
+### top 10 most correlated amongst features:
+```{r}
+cor_feature %>% arrange(-abs(value)) %>% head(10)
+```
+
+### top 10 most correlated amongst response:
+```{r}
+cor_response %>% arrange(-abs(value)) %>% head(10)
+```
+
+
+specify the resampling scheme that caret will use to train, assess, and tune the several models in this r file:
+```{r}
+my_ctrl <- trainControl(method = 'repeatedcv', number = 10, repeats = 3)
+metric_acc <- "RMSE"
+
+```
+
+### Previously, we identified model 6 was the most practical model, so let's tune that
+### Likewise, model 7 was a close 2nd candidate, so let's also tune to see how it compares
+### And for comparasion, let's do model one which was the most complex and had several interactions and predictors
+
+### First, let's tune our linear models - 6 and 7
+```{r}
+mod_6_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                     data = arkansas,
+                     method = 'lm',
+                     preProcess = c("center", "scale"),
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+
+
+mod_7_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                     data = arkansas,
+                     method = 'lm',
+                     preProcess = c("center", "scale"),
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+```
+
+### Now, the elastic tuned models:
+
+```{r}
+enet_default_6 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                     data = arkansas,
+                     method = 'glmnet',
+                     preProcess = c("center", "scale"),
+                     tuneLength = 10,
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+
+
+enet_default_7 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                     data = arkansas,
+                     method = 'glmnet',
+                     preProcess = c("center", "scale"),
+                     tuneLength = 10,
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+
+enet_default_complex <- train(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+             (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value * Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value * Frequent.Mental.Distress.raw.value) + (Population.raw.value * Food.Insecurity.numerator),
+                     data = arkansas,
+                     method = 'glmnet',
+                     preProcess = c("center", "scale"),
+                     tuneLength = 10,
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+```
+
+## Model 6 Elastic Tuned Net Model Eval:
+
+```{r}
+ggplot(enet_default_6)
+```
+
+Best Model after being tuned
+```{r}
+enet_default_6$bestTune
+```
+
+Model 6 coefficents:
+
+```{r}
+coef(enet_default_6$finalModel, s = enet_default_6$bestTune$lambda)
+```
+None of the coefficents got turned off, seems like all were significant
+
+
+## Model 7 Elastic Net Model:
+```{r}
+coef(enet_default_7$finalModel, s = enet_default_7$bestTune$lambda)
+
+```
+Adult.Smoking.raw.value coefficent got turned off (as indicated by the .)           .          
+```{r}
+enet_default_7$bestTune
+```
+```{r}
+ggplot(enet_default_7)
+```
+
+## Complex Elastic Tuned Model (34 df):
+
+```{r}
+enet_default_complex$bestTune
+
+```
+```{r}
+head(coef(enet_default_complex$finalModel, s = enet_default_complex$bestTune$lambda), 29)
+```
+
+Not even looking at all the coefficents, majority of them are turned off... awful... 
+
+### Model 6 and 7 appear to be very similar to one another despite model 6 being half as complex as model 7...
+
+Results for model 6 elastic tuned
+```{r}
+enet_default_6$results %>% arrange(RMSE) %>% head(10)
+```
+
+
+```
+
+
+
+### Let's go more complex...
+```{r}
+
+```
+
+
+
+
+
+
+
