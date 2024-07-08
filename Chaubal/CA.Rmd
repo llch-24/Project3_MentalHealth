@@ -1,0 +1,167 @@
+---
+title: "California Analysis for Capstone Project"
+output: html_document
+date: ""
+---
+
+```{r}
+# install.packages("janitor")
+library(janitor)
+library(ggplot2)
+library(maps)
+
+mental <- analyticdata2024_clean_data_1_ |>
+  clean_names()
+
+```
+
+
+removing states from dataset
+```{r}
+states_to_exclude <- c("New Hampshire”, “New Jersey”, “New York”, “New Mexico”, “North Carolina”, “North Dakota”, “Rhode Island”, “South Carolina”, “South Dakota”, “West Virginia", "United States")
+
+df_filtered <- mental |>
+  filter(grepl(" ", name) | name %in% states_to_exclude)
+
+View(df_filtered)
+
+```
+
+filtering california counties
+```{r}
+
+ca_counties <- df_filtered |> 
+  filter(state_abbreviation == "CA")
+
+View(ca_counties)
+
+```
+
+
+model 6 on California counties
+```{r}
+ca_mod6 <- lm(poor_mental_health_days_raw_value ~  frequent_mental_distress_raw_value + adult_smoking_raw_value + physical_inactivity_raw_value + adult_obesity_raw_value, data = ca_counties) 
+
+ca_mod6 %>% broom::glance()
+
+summary(ca_mod6)
+
+```
+
+k fold cross validation
+```{r}
+library(caret)
+set.seed(150)
+
+formula <- poor_mental_health_days_raw_value ~  frequent_mental_distress_raw_value + adult_smoking_raw_value + physical_inactivity_raw_value + adult_obesity_raw_value
+
+
+k <- 5
+train <- trainControl(method = "cv", number = k)
+# print(train)
+
+# fit model
+model <- train(formula, data = ca_counties, method = "lm", trControl = train)
+
+print(model)
+
+# RMSE = 0.1680734  
+# R^2 = 0.7228592  
+# MAE = 0.1265681
+
+ca_predictions <- predict(model, newdata = ca_counties)
+# View(ca_predictions)
+
+
+ca_cv <- ca_counties |> 
+  mutate(test_fold = sample(rep(1:k, length.out = n())))
+# View(ca_cv)
+
+
+```
+
+creating an actual vs predicted graph (base scatter plot)
+
+```{r}
+ca_results <- data.frame(
+  Actual = ca_counties$poor_mental_health_days_raw_value,
+  Predicted = ca_predictions,
+  Fold = ca_cv$test_fold
+)
+
+ca_results |> 
+  ggplot(aes(x = Actual, y = Predicted, color = Fold)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1)
+
+
+
+```
+
+creating a residuals graph
+```{r}
+
+ca_results <- ca_results |> 
+  mutate(Residuals = Actual - Predicted)
+ca_results
+
+ca_residuals <- ca_results |> 
+  ggplot(aes(x = Predicted, y = Residuals)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 0)
+   
+
+ca_residuals
+
+```
+
+
+
+
+
+
+
+EXTRA CONTENT
+
+```{r}
+ca2 <- df_filtered |> 
+  filter(state_abbreviation == "CA")
+
+length(df_filtered)
+length(ca2)
+```
+
+number of counties in arkansas
+```{r}
+ak_counties <- df_filtered |> 
+  filter(state_abbreviation == "AK")
+length(ak_counties)
+
+
+
+
+```
+
+```{r}
+csv <- "analyticdata2024 - clean_data.csv"
+mental <- read.csv(csv, header = TRUE)
+### Clean data columns
+df %>% clean_names()
+arkansas <- df %>% filter(state_abbreviation == "AR" & !name == "Arkansas")
+arkansas
+
+ca3 <-  df %>% filter(state_abbreviation == "CA" & !name == "California")
+ca3
+
+```
+
+
+
+north dakota counties
+```{r}
+nd_counties <- df_filtered |> 
+  filter(state_abbreviation == "ND")
+length(nd_counties)
+```
+
+
