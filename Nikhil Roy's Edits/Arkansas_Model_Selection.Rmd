@@ -16,6 +16,7 @@ mental <- read.csv(csv, header = TRUE)
 mental %>% clean_names()
 
 arkansas <- mental %>% filter(State.Abbreviation == "AR" & !Name == "Arkansas") 
+
 arkansas
 ```
 
@@ -79,14 +80,36 @@ mod_7_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distres
                      method = 'lm',
                      preProcess = c("center", "scale"),
                      metric = metric_acc,
-                     trControl = my_ctrl)
+                    trControl = my_ctrl)
+
+#mod_6_tune
+summary(mod_6_tune)
+```
+
+
+```{r}
+scaler <- train %>% select(where(is.numeric), -Poor.Mental.Health.Days.raw.value) |> scale()
+train <- train |> select(Poor.Mental.Health.Days.raw.value) |> bind_cols(scaler)
+
+mod6 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
+
+             
+             , data = train)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+tab_model(mod6)
+```
+
+```{r}
+coefplot::coefplot(mod6, intercept = FALSE)
 ```
 
 ### Now, the elastic tuned models:
 
 ```{r}
 enet_default_6 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
-                     data = train,
+                     data = arkansas,
                      method = 'glmnet',
                      preProcess = c("center", "scale"),
                      tuneLength = 10,
@@ -291,16 +314,16 @@ gam_model
 Model Evaluation:
 
 ```{r}
-concrete_model_compare <- resamples(list(Elastic_Net_model_06 = enet_default_6,
-                                         Elastic_Net_model_07 = enet_default_7,
-                                         RF_model_6 = rf_mod_6,
-                                         RF_model_7 = rf_mod_7,
-                                         GAM_model_6 = gam_model,
-                                         GBM_model_6 = fit_gbm_mod_6,
-                                         GBM_model_7 = fit_gbm_mod_7,
-                                         GBM_Tuned_Model = fit_gbm_tune,
-                                         model_6_linear = mod_6_tune,
-                                         model_7_linear = mod_7_tune
+concrete_model_compare <- resamples(list(Elastic6 = enet_default_6,
+                                         Elastic7 = enet_default_7,
+                                         RF6 = rf_mod_6,
+                                         RF7 = rf_mod_7,
+                                         GAM6 = gam_model,
+                                         GBM6 = fit_gbm_mod_6,
+                                         GBM7 = fit_gbm_mod_7,
+                                         GBMTuned = fit_gbm_tune,
+                                         Linear6 = mod_6_tune,
+                                         Linear7 = mod_7_tune
                                          )
                                           )
 
@@ -324,16 +347,143 @@ combined_df <- combined_df %>% select(MAE.Mean, RMSE.Mean, Rsquared.Mean, Time_E
 
 ```{r}
 
-combined_df %>%
+ combined_df %>%
   ggplot(aes(x = RMSE.Mean, y = Time_Efficiency, label = rownames(combined_df))) +
-  geom_point(color = 'darkblue', size = 4) +
-  geom_text(check_overlap = TRUE, color = "red", size = 5.5, hjust = -0.1, vjust = 0.5) +
+  geom_point(color = 'darkblue', size = 2) +
+  geom_text(check_overlap = FALSE, color = "red", size = 3.5, hjust = -0.1, vjust = 0.5) +
   labs(
-    y = "Time Efficiency (In Seconds)"
+    y = "Time Efficiency (In Seconds)",
+    title = "Arkansas Model Performance Based On Time Efficiency Per Model",
+       x = "RMSE"
   ) +
-  scale_x_continuous(limits = c(0.16, 0.21), breaks = seq(0.16, 0.21, by = 0.01))
+  scale_x_continuous(limits = c(0.16, 0.21), breaks = seq(0.16, 0.21, by = 0.01)) +
+  
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"))
 
 
 ```
 Model 6 Linear seems to be the most optimal (look at graph in view)
+
+
+
+```{r}
+### extract all of the resample fold performance metrics per model
+concrete_model_compare_lf <- concrete_model_compare$values %>% tibble::as_tibble() %>%
+  pivot_longer(!c("Resample")) %>% 
+  tidyr::separate(name,
+                  c("model_name", "metric_name"),
+                  sep = "~") %>% filter(metric_name != "MAE")
+
+### visualize the performance metrics sumamries, show the individual
+### fold results with markers and the cross-validation average
+### and standard error, which model is better?
+concrete_model_compare_lf %>% 
+  ggplot(mapping = aes(x = model_name, y = value)) +
+  stat_summary(fun.data = "mean_se",
+               color = "red",
+               fun.args = list(mult = 1)) +
+  
+  coord_flip() +
+  facet_grid( . ~ metric_name, scales = "free_x") +
+  theme_bw() +
+  labs(
+    title = "Performance metrics of models",
+    x = "Model Names",
+    y = "Performance"
+  ) +
+   
+  
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold")) 
+
+
+```
+
+Linear Model 6 is the best:
+
+
+Predictions
+```{r}
+
+# Make predictions on the training and test data
+train_predictions <- predict(mod_6_tune, newdata = train)
+test_predictions <- predict(mod_6_tune, newdata = test)
+
+# Plot predictions vs actual values for training and test data
+ggplot() +
+  geom_point(aes(x = train$Poor.Mental.Health.Days.raw.value, y = train_predictions, color = "Train"), alpha = 0.75) +
+  geom_point(aes(x = test$Poor.Mental.Health.Days.raw.value, y = test_predictions, color = "Test"), alpha = 0.75) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  ggtitle("Model 6 Actual vs Predicted Values For US Data Mental Health Days") +
+  xlab("Actual Values") +
+  ylab("Predicted Values") +
+  scale_color_manual(name = "Data", values = c("Train" = "blue", "Test" = "orange")) +
+  
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"))
+
+```
+
+```{r}
+# Evaluate the model on training data
+train_r_squared <- cor(train$Poor.Mental.Health.Days.raw.value, train_predictions)^2
+train_mae <- mean(abs(train$Poor.Mental.Health.Days.raw.value - train_predictions))
+
+# Evaluate the model on test data
+test_r_squared <- cor(test$Poor.Mental.Health.Days.raw.value, test_predictions)^2
+test_mae <- mean(abs(test$Poor.Mental.Health.Days.raw.value - test_predictions))
+
+cat("Train R-squared:", train_r_squared, "\n")
+cat("Train MAE:", train_mae, "\n")
+cat("Test R-squared:", test_r_squared, "\n")
+cat("Test MAE:", test_mae, "\n")
+```
+
+
+
+```{r}
+
+# Make predictions on the training and test data
+train_predictions <- predict(enet_default_6, newdata = train)
+test_predictions <- predict(enet_default_6, newdata = test)
+
+# Plot predictions vs actual values for training and test data
+ggplot() +
+  geom_point(aes(x = train$Poor.Mental.Health.Days.raw.value, y = train_predictions, color = "Train"), alpha = 0.75) +
+  geom_point(aes(x = test$Poor.Mental.Health.Days.raw.value, y = test_predictions, color = "Test"), alpha = 0.75) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  ggtitle("Elastic Tuned 6 Actual vs Predicted Values For US Data Mental Health Days") +
+  xlab("Actual Values") +
+  ylab("Predicted Values") +
+  scale_color_manual(name = "Data", values = c("Train" = "blue", "Test" = "orange")) +
+  
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"))
+
+```
+
+
+
+```{r}
+# Evaluate the model on training data
+train_r_squared <- cor(train$Poor.Mental.Health.Days.raw.value, train_predictions)^2
+train_mae <- mean(abs(train$Poor.Mental.Health.Days.raw.value - train_predictions))
+
+# Evaluate the model on test data
+test_r_squared <- cor(test$Poor.Mental.Health.Days.raw.value, test_predictions)^2
+test_mae <- mean(abs(test$Poor.Mental.Health.Days.raw.value - test_predictions))
+
+cat("Train R-squared:", train_r_squared, "\n")
+cat("Train MAE:", train_mae, "\n")
+cat("Test R-squared:", test_r_squared, "\n")
+cat("Test MAE:", test_mae, "\n")
+```
+
+
+
 

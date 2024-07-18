@@ -6,7 +6,9 @@ library(reshape2)
 
 ```
 
+
 ### Data Reading and Viewing
+
 
 ```{r,include = FALSE}
 csv <- "analyticdata2024 - clean_data.csv"
@@ -21,7 +23,9 @@ mental %>% clean_names()
 mental %>% glimpse()
 ```
 
+
 ### Filtering in relavent correlations between FEATURES Themselves and using a cutoff
+
 
 ```{r}
 mental_filtered <- mental %>% select(where(is.numeric))
@@ -34,13 +38,17 @@ cor_feature <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter( (v
 
 ```
 
+
 ### View Table of relavent correlations between FEATURES:
+
 
 ```{r, include=FALSE}
 cor_feature
 ```
 
+
 ### Filtering in relavent correlations between RESPONSE and Features Themselves and using a cutoff
+
 
 ```{r}
 
@@ -48,13 +56,17 @@ cor_response <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter(Va
 
 ```
 
+
 ### View Table of relavent correlations between RESPONSE and Feature:
+
 
 ```{r, include=FALSE}
 cor_response
 ```
 
+
 ### Correlation HeatMap For feature matrix:
+
 
 ```{r}
 library(ggcorrplot)
@@ -70,7 +82,9 @@ ggcorrplot(cor_matrix_filtered, type = "lower", lab = TRUE)
 
 ```
 
+
 ### Model 1
+
 
 ```{r}
 mod1 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
@@ -89,7 +103,9 @@ mod1 %>% broom::glance()
 #car:: vif(mod1)
 ```
 
+
 ### Model 2
+
 
 ```{r}
 mod2 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
@@ -109,7 +125,9 @@ library(ggfortify)
 autoplot(mod2, ncol = 4)
 ```
 
+
 ### Model 3
+
 
 ```{r}
 mod3 <- lm(Poor.Mental.Health.Days.raw.value ~ Ratio.of.population.to.mental.health.providers. + Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
@@ -129,7 +147,9 @@ autoplot(mod3, ncol = 4)
 coefplot::coefplot(mod3, intercept = FALSE)
 ```
 
+
 ### Model 4:
+
 
 ```{r}
 mod4 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
@@ -143,7 +163,9 @@ broom::glance(mod4)
 #summary(mod4)
 ```
 
+
 ### Model 5
+
 
 ```{r}
 mod5 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Food.Insecurity.raw.value
@@ -157,7 +179,9 @@ mod5 %>% broom::glance()
 #summary(mod5)
 ```
 
+
 ### Model 6
+
 
 ```{r}
 mod6 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
@@ -178,7 +202,9 @@ summary(mod6)
 
 
 
+
 ### Model 7 -\> includes high correlated repsonses and New negative correlations
+
 
 ```{r}
 ### Model 7
@@ -200,7 +226,9 @@ mod7 %>% broom::glance()
 car::vif(mod7)
 ```
 
+
 ### Model 8 -\> include interactive terms to help further reduce BIC and increase adjusted R\^2
+
 
 ```{r}
 ### Model 8
@@ -221,7 +249,9 @@ library(ggfortify)
 autoplot(mod6, ncol = 4)
 ```
 
+
 ### Model 9 -\> adding ratio of pop to mental health providers from model 8
+
 
 ```{r}
 ### Model 9
@@ -233,7 +263,9 @@ mod9 %>% broom::glance()
 
 ```
 
+
 ### Model 10 -\> All predictors from df -\> mental
+
 
 ```{r}
 ### Model 10
@@ -243,7 +275,9 @@ mod10 %>% broom::glance()
 
 ```
 
+
 ### Combined Model Evaluation:
+
 
 ```{r}
 extract_metrics <- function(mod, mod_name)
@@ -271,15 +305,16 @@ all_metrics %>%
   theme_bw()
 ```
 
+
 ### Model 10 is absurdly horrible and much more complex compared to the other models so let's get a closer look on the other models, disregarding model 10
+
 
 ```{r}
 all_metrics <- purrr::map2_dfr(list(mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8, mod9),
                                as.character(1:9),
                                extract_metrics)
 all_metrics %>% 
-  select(mod_name,  df, adj.r.squared, AIC, BIC) %>% 
-  rename(Adjusted_R_Squared = adj.r.squared, Number_Of_Predictors = df) %>%
+  select(mod_name, df, adj.r.squared, AIC, BIC) %>% 
   pivot_longer(!c("mod_name")) %>% 
   ggplot(mapping = aes(x = mod_name, y = value)) +
   geom_point(size = 3) +
@@ -288,16 +323,8 @@ all_metrics %>%
   labs(
     title = "Model Performance Evaluation On US Data",
     x = "Models (1-9)",
-    y = "Performance",
-    
-  ) +
-  theme(legend.position = "bottom",
-        plot.title = element_text(hjust = 0.5, 
-                                  face = "bold"),
-        strip.text = element_text(size = 16))
-  
-    
-  
+    y = "Performance"
+  )
 ```
 
 ```{r}
@@ -306,8 +333,6 @@ all_metrics <- purrr::map2_dfr(list(mod6, mod7, mod8),
                                extract_metrics)
 all_metrics %>% 
   select(mod_name, df, adj.r.squared, AIC, BIC) %>% 
-  rename(Adjusted_R_Squared = adj.r.squared, Number_Of_Predictors = df) %>%
-
   pivot_longer(!c("mod_name")) %>% 
   ggplot(mapping = aes(x = mod_name, y = value)) +
   geom_point(size = 3) +
@@ -317,17 +342,15 @@ all_metrics %>%
     title = "Model Performance Evaluation On US Data",
     x = "Models 6,7,8",
     y = "Performance"
-  ) +
-  theme(legend.position = "bottom",
-        plot.title = element_text(hjust = 0.5, 
-                                  face = "bold"),
-         strip.text = element_text(size = 16))
+  )
 ```
+
 
 
 ### Model 7 seems to be the best -> so let's see how it does predicting response
 
 ### Let's see how well model 8 does with making predictions...
+
 
 ```{r}
 mod_7_pred <- mental |>
@@ -364,9 +387,11 @@ mod_8_pred <- mental |>
 ```
 
 
+
 # Overfitting?
 
 # Test + Train Split: 5-fold Cross-Validation (80-20):
+
 ```{r, include = FALSE}
 set.seed(3231)
 
@@ -380,12 +405,16 @@ mental <- mental |>
 
 ```
 
+
 ### Verify each column got assigned a fold
+
 ```{r}
 mental %>% count(fold_id)
 ```
 
+
 ### Model 7
+
 ```{r}
 
 models_cv <- function(k) {
@@ -411,7 +440,9 @@ mod7_cv_results <- map(1:n_folds, models_cv) |>
 
 ```
 
+
 ### Model 8
+
 ```{r}
 
 models_cv <- function(k) {
@@ -437,7 +468,9 @@ mod8_cv_results <- map(1:n_folds, models_cv) |>
 
 ```
 
+
 Model 7 and Model 8 RMSE... IS there really a difference?
+
 ```{r}
 mod7_cv_results |> 
   summarize(avg_rmse = mean(rmse))
@@ -446,6 +479,7 @@ mod8_cv_results |>
   summarize(avg_rmse = mean(rmse))
 ```
 
+
 # Model 7 deems to be the best model!!
 
 
@@ -453,6 +487,7 @@ mod8_cv_results |>
 ## Let's see if it overfits or not:
 
 ### Train Model 7 Specifically
+
 ```{r}
 library(caret)
 
@@ -467,7 +502,9 @@ cv_mod_7 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.
 
 ```
 
+
 ### Make predictions
+
 ```{r}
 mental$predictions <- predict(cv_mod_7, newdata = mental)
 
@@ -481,9 +518,11 @@ mental %>%
 
 ```
 
+
 ### Very well in terms of predictions on the test data with the train data to the model (model 7)
 
 ### However, let's assess if model is Overfitting before celebrating...
+
 
 ```{r}
 library(caret)
@@ -529,49 +568,27 @@ ggplot() +
   geom_point(aes(x = trainData$Poor.Mental.Health.Days.raw.value, y = train_predictions, color = "Train"), alpha = 0.75) +
   geom_point(aes(x = testData$Poor.Mental.Health.Days.raw.value, y = test_predictions, color = "Test"), alpha = 0.75) +
   geom_abline(slope = 1, intercept = 0, color = "red") +
-  ggtitle("Model 6 Actual vs Predicted Values For US Data Mental Health Days") +
+  ggtitle("Actual vs Predicted Values") +
   xlab("Actual Values") +
   ylab("Predicted Values") +
-  scale_color_manual(name = "Data", values = c("Train" = "blue", "Test" = "orange")) +
-  
-  theme(legend.position = "bottom",
-        plot.title = element_text(hjust = 0.5, 
-                                  face = "bold"))
+  scale_color_manual(name = "Data", values = c("Train" = "blue", "Test" = "orange"))
 
 ```
+
 
 If the training points were significantly closer to the line than the test points, it would suggest overfitting. However, in this case, both sets of points seem to follow the line closely, indicating that the model generalizes well to unseen data.
 
 ### Conclusion: Model 7 is the best model to use:
 
 Predictors contained in model 7
+
 ```{r}
 mod7$coefficients
 ```
+
 summary/signifigance:
-```{r}
-mod6$call
-```
 
 ```{r}
-summary(mod8)
+summary(mod7)
 ```
-
-
-
-
-```{r}
-library(sjPlot)
-library(sjmisc)
-library(sjlabelled)
-tab_model(mod6)
-```
-
-
-
-
-
-
-
-
 

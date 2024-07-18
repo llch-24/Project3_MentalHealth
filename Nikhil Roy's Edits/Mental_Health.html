@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>mental_health</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Mental_Health_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Mental_Health_files/libs/quarto-html/quarto.js"></script>
+<script src="Mental_Health_files/libs/quarto-html/popper.min.js"></script>
+<script src="Mental_Health_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Mental_Health_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Mental_Health_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Mental_Health_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Mental_Health_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Mental_Health_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Mental_Health_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="data-reading-and-viewing" class="level3">
+<h3 class="anchored" data-anchor-id="data-reading-and-viewing">Data Reading and Viewing</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ak <span class="ot">&lt;-</span> mental <span class="sc">%&gt;%</span> <span class="fu">filter</span>(State.Abbreviation <span class="sc">==</span> <span class="st">"AK"</span>) </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ak <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   X5.digit.FIPS.Code State.Abbreviation                       Name
+1                2000                 AK                     Alaska
+2                2013                 AK     Aleutians East Borough
+3                2016                 AK Aleutians West Census Area
+4                2020                 AK          Anchorage Borough
+5                2050                 AK         Bethel Census Area
+6                2060                 AK        Bristol Bay Borough
+7                2063                 AK        Chugach Census Area
+8                2066                 AK   Copper River Census Area
+9                2068                 AK             Denali Borough
+10               2070                 AK     Dillingham Census Area
+   Release.Year Poor.or.Fair.Health.raw.value
+1          2024                         0.143
+2          2024                         0.191
+3          2024                         0.153
+4          2024                         0.135
+5          2024                         0.300
+6          2024                         0.144
+7          2024                         0.128
+8          2024                         0.158
+9          2024                         0.142
+10         2024                         0.238
+   Poor.Physical.Health.Days.raw.value Poor.Mental.Health.Days.raw.value
+1                             3.564454                          4.588410
+2                             3.696286                          3.992769
+3                             3.145327                          3.815269
+4                             3.420785                          4.598679
+5                             5.930766                          6.485706
+6                             3.656409                          4.490508
+7                             3.462937                          4.433240
+8                             3.972858                          4.807877
+9                             3.535991                          4.608646
+10                            4.809272                          6.063944
+   Adult.Smoking.raw.value Adult.Obesity.raw.value
+1                    0.172                   0.334
+2                    0.186                   0.313
+3                    0.155                   0.303
+4                    0.149                   0.329
+5                    0.354                   0.431
+6                    0.187                   0.356
+7                    0.154                   0.314
+8                    0.194                   0.349
+9                    0.169                   0.276
+10                   0.291                   0.407
+   Food.Environment.Index.raw.value Physical.Inactivity.raw.value
+1                               7.0                         0.200
+2                               7.4                         0.288
+3                               7.9                         0.251
+4                               8.5                         0.205
+5                               2.3                         0.350
+6                               7.7                         0.204
+7                                NA                         0.188
+8                                NA                         0.223
+9                               4.5                         0.203
+10                              4.6                         0.280
+   Access.to.Exercise.Opportunities.raw.value Excessive.Drinking.raw.value
+1                                  0.78230166                    0.1961050
+2                                  0.27368421                    0.1571833
+3                                  0.81364679                    0.1957387
+4                                  0.92182924                    0.1995426
+5                                  0.91771135                    0.1884964
+6                                  0.05805687                    0.1951061
+7                                  0.79752182                    0.2044093
+8                                  0.52426442                    0.1839189
+9                                  0.72019765                    0.1995717
+10                                 0.46510191                    0.2076563
+   Alcohol.Impaired.Driving.Deaths.raw.value
+1                                  0.3501401
+2                                         NA
+3                                         NA
+4                                  0.2929293
+5                                  0.5000000
+6                                  1.0000000
+7                                         NA
+8                                         NA
+9                                  0.1666667
+10                                 0.5000000
+   Sexually.Transmitted.Infections.raw.value Teen.Births.raw.value
+1                                      760.4              19.68134
+2                                      147.1                    NA
+3                                      217.4                    NA
+4                                      870.1              16.02364
+5                                     2786.0              53.49324
+6                                         NA                    NA
+7                                      158.5                    NA
+8                                      608.4                    NA
+9                                         NA                    NA
+10                                     733.4              35.86322
+   Mental.Health.Providers.raw.value
+1                       0.0072275394
+2                       0.0008828723
+3                       0.0017571261
+4                       0.0072924829
+5                       0.0290847346
+6                       0.0000000000
+7                       0.0020366599
+8                       0.0038624952
+9                                 NA
+10                      0.0095278425
+   Ratio.of.population.to.mental.health.providers.
+1                                         138.3597
+2                                        1132.6667
+3                                         569.1111
+4                                         137.1275
+5                                          34.3823
+6                                        -865.0000
+7                                         491.0000
+8                                         258.9000
+9                                               NA
+10                                        104.9556
+   Preventable.Hospital.Stays.raw.value Income.Inequality.raw.value
+1                                  1866                    4.162144
+2                                    NA                    4.540566
+3                                    NA                    2.532934
+4                                  1797                    4.025027
+5                                  2547                    5.670851
+6                                   665                    3.553355
+7                                    NA                    3.206996
+8                                    NA                    4.938327
+9                                    NA                    5.400995
+10                                 3113                    4.296846
+   High.School.Completion.raw.value Unemployment.raw.value
+1                         0.9347790             0.04036109
+2                         0.8100935             0.01972062
+3                         0.8953639             0.03074713
+4                         0.9417939             0.03330206
+5                         0.8273815             0.08817365
+6                         0.9496855             0.04265403
+7                         0.9454250             0.02863891
+8                         0.9240648             0.09252669
+9                         0.9665472             0.06318957
+10                        0.8811165             0.05585586
+   Income.Inequality.raw.value.1 Children.in.Single.Parent.Households.raw.value
+1                       4.162144                                     0.20727580
+2                       4.540566                                     0.26139089
+3                       2.532934                                     0.10452962
+4                       4.025027                                     0.22417134
+5                       5.670851                                     0.23449883
+6                       3.553355                                     0.06134969
+7                       3.206996                                     0.19380356
+8                       4.938327                                     0.33959538
+9                       5.400995                                     0.05882353
+10                      4.296846                                     0.33674863
+   Social.Associations.raw.value Air.Pollution...Particulate.Matter.raw.value
+1                      11.287437                                         7.55
+2                       0.000000                                           NA
+3                       0.000000                                           NA
+4                      11.765890                                         8.30
+5                       2.694401                                           NA
+6                       0.000000                                           NA
+7                       0.000000                                           NA
+8                       0.000000                                           NA
+9                       0.000000                                           NA
+10                      0.000000                                           NA
+   Drinking.Water.Violations.raw.value Severe.Housing.Problems.raw.value
+1                                 0.64                         0.1948467
+2                                 0.00                         0.1262626
+3                                 0.00                         0.1915709
+4                                 1.00                         0.1635505
+5                                 1.00                         0.5766667
+6                                 0.00                         0.1578947
+7                                   NA                         0.1017316
+8                                   NA                         0.2018779
+9                                 1.00                         0.2689655
+10                                0.00                         0.4020979
+   Percentage.of.households.with.high.housing.costs
+1                                        0.11002975
+2                                        0.07878788
+3                                        0.03218391
+4                                        0.11954584
+5                                        0.10187249
+6                                        0.09252669
+7                                        0.04935065
+8                                        0.09330820
+9                                        0.06758621
+10                                       0.07924264
+   Percentage.of.households.with.overcrowding
+1                                  0.06475948
+2                                  0.02929293
+3                                  0.11877395
+4                                  0.04487239
+5                                  0.32222222
+6                                  0.07719298
+7                                  0.04935065
+8                                  0.04507042
+9                                  0.03172414
+10                                 0.25174825
+   Percentage.of.households.with.lack.of.kitchen.or.plumbing.facilities
+1                                                            0.04222592
+2                                                            0.03535354
+3                                                            0.04980843
+4                                                            0.00944190
+5                                                            0.32666667
+6                                                            0.06666667
+7                                                            0.01731602
+8                                                            0.07981221
+9                                                            0.20000000
+10                                                           0.14685315
+   Driving.Alone.to.Work.raw.value Life.Expectancy.raw.value
+1                        0.6593727                  77.06268
+2                        0.2049911                        NA
+3                        0.4854966                  86.26593
+4                        0.7184331                  77.09381
+5                        0.1970826                  69.78755
+6                        0.6780822                        NA
+7                        0.6560801                        NA
+8                        0.6423423                        NA
+9                        0.2627790                  84.68774
+10                       0.3362881                  68.43700
+   Frequent.Mental.Distress.raw.value Food.Insecurity.raw.value
+1                           0.1416816                     0.107
+2                           0.1290000                     0.093
+3                           0.1220000                     0.100
+4                           0.1450000                     0.091
+5                           0.2140000                     0.205
+6                           0.1540000                     0.093
+7                           0.1460000                     0.084
+8                           0.1600000                     0.124
+9                           0.1500000                     0.139
+10                          0.1900000                     0.140
+   Food.Insecurity.numerator Limited.Access.to.Healthy.Foods.raw.value
+1                      78260                                0.07868789
+2                        320                                0.14590333
+3                        530                                0.07808430
+4                      26740                                0.04570024
+5                       3800                                0.39852650
+6                         80                                0.11679363
+7                        590                                        NA
+8                        330                                        NA
+9                        300                                0.33091448
+10                       690                                0.31466434
+   Drug.Overdose.Deaths.raw.value Insufficient.Sleep.raw.value
+1                        25.14376                     0.318849
+2                              NA                     0.339000
+3                              NA                     0.334000
+4                        30.46746                     0.309000
+5                        18.05706                     0.370000
+6                              NA                     0.324000
+7                              NA                           NA
+8                              NA                           NA
+9                              NA                     0.308000
+10                             NA                     0.319000
+   Uninsured.Adults.raw.value Uninsured.Children.raw.value
+1                   0.1519706                   0.08345004
+2                   0.2282448                   0.13709677
+3                   0.2065332                   0.17280000
+4                   0.1312828                   0.07359173
+5                   0.2173323                   0.06944182
+6                   0.1798419                   0.14364641
+7                   0.1632124                   0.11264947
+8                   0.1794872                   0.11922504
+9                   0.1451613                   0.09931507
+10                  0.2278261                   0.08993082
+   Ratio.of.population.to.primary.care.providers.other.than.physicians.
+1                                                              559.1334
+2                                                             1132.6667
+3                                                              365.8571
+4                                                              438.3893
+5                                                              536.9706
+6                                                              288.3333
+7                                                             3437.0000
+8                                                              431.5000
+9                                                              528.3333
+10                                                             944.6000
+   High.School.Graduation.raw.value Disconnected.Youth.raw.value
+1                         0.7828647                    0.1118221
+2                                NA                           NA
+3                                NA                           NA
+4                         0.8190399                    0.1008203
+5                         0.6067857                    0.1843434
+6                                NA                           NA
+7                                NA                           NA
+8                                NA                           NA
+9                         0.8250000                           NA
+10                               NA                           NA
+   School.Segregation.raw.value School.Funding.Adequacy.raw.value
+1                    0.24479189                          6801.562
+2                    0.12534790                         26955.540
+3                    0.20850699                         11035.230
+4                    0.09497531                          2907.981
+5                    0.23084882                         -4229.032
+6                    0.02721301                         32379.685
+7                    0.12456746                                NA
+8                    0.20606569                                NA
+9                    0.04473934                          1498.964
+10                   0.16621331                         19324.095
+   Gender.Pay.Gap.raw.value Median.Household.Income.raw.value
+1                 0.8336337                             88072
+2                 1.0051948                             85852
+3                 0.6459691                            112218
+4                 0.8547646                             99162
+5                 0.9801370                             59011
+6                 0.8198395                             96382
+7                 0.7053822                             91356
+8                 0.7422925                             63837
+9                 0.4200142                             90897
+10                0.9314232                             69716
+   Children.Eligible.for.Free.or.Reduced.Price.Lunch.raw.value
+1                                                           NA
+2                                                           NA
+3                                                           NA
+4                                                           NA
+5                                                           NA
+6                                                           NA
+7                                                           NA
+8                                                           NA
+9                                                           NA
+10                                                          NA
+   Residential.Segregation...Black.White.raw.value
+1                                         57.23968
+2                                               NA
+3                                               NA
+4                                         47.82083
+5                                         10.44011
+6                                               NA
+7                                               NA
+8                                               NA
+9                                               NA
+10                                              NA
+   Child.Care.Cost.Burden.raw.value Child.Care.Centers.raw.value
+1                         0.2489734                    3.7473976
+2                         0.1912827                           NA
+3                         0.2364059                           NA
+4                         0.2660394                    4.4020180
+5                         0.3785735                    0.5257624
+6                         0.1947459                           NA
+7                         0.2368974                           NA
+8                         0.2179770                           NA
+9                         0.4253276                   20.8333333
+10                        0.2517213                    2.1551724
+   Homicides.raw.value Suicides.raw.value Crude.suicide.rate
+1             8.364165           27.70351           27.71871
+2                   NA                 NA                 NA
+3                   NA                 NA                 NA
+4             9.433054           21.44893           22.01351
+5            14.891916           59.52134           61.08735
+6                   NA                 NA                 NA
+7                   NA                 NA                 NA
+8                   NA                 NA                 NA
+9                   NA                 NA                 NA
+10                  NA           42.24938           44.98426
+   Firearm.Fatalities.raw.value Motor.Vehicle.Crash.Deaths.raw.value
+1                      23.71611                            10.460058
+2                            NA                                   NA
+3                            NA                                   NA
+4                      20.97839                             8.651039
+5                      37.08875                            11.756776
+6                            NA                                   NA
+7                            NA                                   NA
+8                            NA                                   NA
+9                            NA                                   NA
+10                     53.16321                                   NA
+   Census.Participation.raw.value Homeownership.raw.value
+1                              NA               0.6626850
+2                           0.110               0.5884316
+3                           0.171               0.2765738
+4                           0.659               0.6380421
+5                           0.156               0.5899233
+6                           0.012               0.5070423
+7                              NA               0.6261343
+8                              NA               0.6880734
+9                           0.185               0.8685714
+10                          0.165               0.6076590
+   Severe.Housing.Cost.Burden.raw.value Broadband.Access.raw.value
+1                            0.12095406                  0.8936704
+2                            0.09917355                  0.5773081
+3                            0.06546645                  0.7760578
+4                            0.13194167                  0.9356974
+5                            0.10577626                  0.7715225
+6                            0.02978723                  0.7781690
+7                            0.06177024                  0.8889292
+8                            0.06143001                  0.7752294
+9                            0.07976654                  0.8285714
+10                           0.09169960                  0.7565029
+   Population.raw.value X..Below.18.Years.of.Age.raw.value
+1                733583                         0.24063126
+2                  3398                         0.05709241
+3                  5122                         0.09605623
+4                287145                         0.23510073
+5                 18257                         0.35126253
+6                   865                         0.21387283
+7                  6874                         0.22345068
+8                  2589                         0.24488219
+9                  1585                         0.17602524
+10                 4723                         0.31124285
+   X..65.and.Older.raw.value X..Non.Hispanic.Black.raw.value
+1                 0.13851330                     0.032379431
+2                 0.09947028                     0.102118894
+3                 0.07555642                     0.081413510
+4                 0.12848909                     0.051298125
+5                 0.08692556                     0.009694912
+6                 0.18612717                     0.006936416
+7                 0.16511493                     0.012074484
+8                 0.19466976                     0.008111240
+9                 0.13817035                     0.034069401
+10                0.12068600                     0.008257463
+   X..American.Indian.or.Alaska.Native.raw.value X..Asian.raw.value
+1                                     0.15702927         0.06729300
+2                                     0.13919953         0.46380224
+3                                     0.09000390         0.38578680
+4                                     0.09541521         0.10297585
+5                                     0.84800351         0.01046174
+6                                     0.31098266         0.02196532
+7                                     0.12816410         0.07070119
+8                                     0.18733102         0.02974121
+9                                     0.06561514         0.05552050
+10                                    0.72559814         0.01122168
+   X..Native.Hawaiian.or.Other.Pacific.Islander.raw.value X..Hispanic.raw.value
+1                                            0.0167247605            0.07701242
+2                                            0.0097115951            0.17363155
+3                                            0.0378758298            0.15755564
+4                                            0.0331713942            0.09944801
+5                                            0.0019718464            0.02240237
+6                                            0.0034682081            0.11213873
+7                                            0.0106197265            0.06284550
+8                                            0.0038624952            0.06952491
+9                                            0.0006309148            0.05299685
+10                                           0.0023290282            0.03557061
+   X..Non.Hispanic.White.raw.value X..Not.Proficient.in.English.raw.value
+1                       0.58795256                            0.015452809
+2                       0.08887581                            0.145498636
+3                       0.23057399                            0.100220044
+4                       0.55092375                            0.020620115
+5                       0.08139344                            0.013278609
+6                       0.38728324                            0.000000000
+7                       0.66511493                            0.017455981
+8                       0.63962920                            0.000000000
+9                       0.74195584                            0.004418262
+10                      0.13995342                            0.016910936
+   X..Female.raw.value X..Rural.raw.value
+1            0.4738878         0.35100513
+2            0.3016480         1.00000000
+3            0.2912925         1.00000000
+4            0.4874436         0.04269229
+5            0.4743386         0.72693668
+6            0.4658960         1.00000000
+7            0.4611580         1.00000000
+8            0.4592507         1.00000000
+9            0.4536278         1.00000000
+10           0.4772390         1.00000000</code></pre>
+</div>
+</div>
+</section>
+<section id="filtering-in-relavent-correlations-between-features-themselves-and-using-a-cutoff" class="level3">
+<h3 class="anchored" data-anchor-id="filtering-in-relavent-correlations-between-features-themselves-and-using-a-cutoff">Filtering in relavent correlations between FEATURES Themselves and using a cutoff</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mental_filtered <span class="ot">&lt;-</span> mental <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">where</span>(is.numeric))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>correlations <span class="ot">&lt;-</span> <span class="fu">cor</span>(mental_filtered) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in cor(mental_filtered): the standard deviation is zero</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>correlations <span class="ot">&lt;-</span> <span class="fu">melt</span>(correlations, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>cor_feature <span class="ot">&lt;-</span> correlations <span class="sc">%&gt;%</span> <span class="fu">distinct</span>(value, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>( (value <span class="sc">&gt;</span> <span class="fl">0.70</span> <span class="sc">&amp;</span> value <span class="sc">&lt;</span> <span class="dv">1</span>) <span class="sc">|</span> value <span class="sc">&lt;</span> <span class="sc">-</span><span class="fl">0.70</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="view-table-of-relavent-correlations-between-features" class="level3">
+<h3 class="anchored" data-anchor-id="view-table-of-relavent-correlations-between-features">View Table of relavent correlations between FEATURES:</h3>
+</section>
+<section id="filtering-in-relavent-correlations-between-response-and-features-themselves-and-using-a-cutoff" class="level3">
+<h3 class="anchored" data-anchor-id="filtering-in-relavent-correlations-between-response-and-features-themselves-and-using-a-cutoff">Filtering in relavent correlations between RESPONSE and Features Themselves and using a cutoff</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cor_response <span class="ot">&lt;-</span> correlations <span class="sc">%&gt;%</span> <span class="fu">distinct</span>(value, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Var2 <span class="sc">==</span> <span class="st">"Poor.Mental.Health.Days.raw.value"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="view-table-of-relavent-correlations-between-response-and-feature" class="level3">
+<h3 class="anchored" data-anchor-id="view-table-of-relavent-correlations-between-response-and-feature">View Table of relavent correlations between RESPONSE and Feature:</h3>
+</section>
+<section id="correlation-heatmap-for-feature-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="correlation-heatmap-for-feature-matrix">Correlation HeatMap For feature matrix:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggcorrplot)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>cor_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(mental_filtered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in cor(mental_filtered): the standard deviation is zero</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter the correlation matrix to include only the significant correlations</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>cor_matrix_filtered <span class="ot">&lt;-</span> cor_matrix</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>cor_matrix_filtered[<span class="fu">abs</span>(cor_matrix_filtered) <span class="sc">&lt;</span> <span class="fl">0.70</span> <span class="sc">|</span> <span class="fu">abs</span>(cor_matrix_filtered) <span class="sc">&gt;=</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the correlation matrix using ggcorrplot</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggcorrplot</span>(cor_matrix_filtered, <span class="at">type =</span> <span class="st">"lower"</span>, <span class="at">lab =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Mental_Health_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="model-1" class="level3">
+<h3 class="anchored" data-anchor-id="model-1">Model 1</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span> (Frequent.Mental.Distress.raw.value <span class="sc">*</span> Food.Insecurity.raw.value) <span class="sc">+</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>             (Food.Insecurity.raw.value <span class="sc">*</span> Poor.Physical.Health.Days.raw.value <span class="sc">*</span> Poor.or.Fair.Health.raw.value <span class="sc">*</span> Physical.Inactivity.raw.value <span class="sc">*</span> Frequent.Mental.Distress.raw.value) <span class="sc">+</span> (Population.raw.value <span class="sc">*</span> Food.Insecurity.numerator)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>             , <span class="at">data =</span> mental)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>mod1 <span class="sc">%&gt;%</span> broom<span class="sc">::</span><span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1     0.906         0.905 0.189      901.       0    34   812. -1551. -1333.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#mod1$terms</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(mod1)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#car:: vif(mod1)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="model-2" class="level3">
+<h3 class="anchored" data-anchor-id="model-2">Model 2</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span> (Frequent.Mental.Distress.raw.value <span class="sc">*</span> Food.Insecurity.raw.value) <span class="sc">+</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>             (Food.Insecurity.raw.value <span class="sc">*</span> Poor.Physical.Health.Days.raw.value) <span class="sc">+</span> (Poor.or.Fair.Health.raw.value <span class="sc">*</span> Physical.Inactivity.raw.value) <span class="sc">+</span> Frequent.Mental.Distress.raw.value <span class="sc">+</span> (Population.raw.value <span class="sc">*</span> Food.Insecurity.numerator)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>             , <span class="at">data =</span> mental)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">glance</span>(mod2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1     0.899         0.899 0.195     2582.       0    11   692. -1359. -1280.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * 
+    Food.Insecurity.raw.value) + (Food.Insecurity.raw.value * 
+    Poor.Physical.Health.Days.raw.value) + (Poor.or.Fair.Health.raw.value * 
+    Physical.Inactivity.raw.value) + Frequent.Mental.Distress.raw.value + 
+    (Population.raw.value * Food.Insecurity.numerator), data = mental)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.64479 -0.12513 -0.00494  0.12688  0.83192 
+
+Coefficients:
+                                                                Estimate
+(Intercept)                                                    3.701e-01
+Frequent.Mental.Distress.raw.value                             2.932e+01
+Food.Insecurity.raw.value                                      6.437e+00
+Poor.Physical.Health.Days.raw.value                            3.201e-01
+Poor.or.Fair.Health.raw.value                                 -3.690e+00
+Physical.Inactivity.raw.value                                 -4.947e+00
+Population.raw.value                                           5.347e-08
+Food.Insecurity.numerator                                     -3.169e-07
+Frequent.Mental.Distress.raw.value:Food.Insecurity.raw.value  -2.608e+00
+Food.Insecurity.raw.value:Poor.Physical.Health.Days.raw.value -1.493e+00
+Poor.or.Fair.Health.raw.value:Physical.Inactivity.raw.value    1.125e+01
+Population.raw.value:Food.Insecurity.numerator                -6.210e-16
+                                                              Std. Error
+(Intercept)                                                    1.093e-01
+Frequent.Mental.Distress.raw.value                             1.519e+00
+Food.Insecurity.raw.value                                      9.116e-01
+Poor.Physical.Health.Days.raw.value                            5.542e-02
+Poor.or.Fair.Health.raw.value                                  6.556e-01
+Physical.Inactivity.raw.value                                  3.108e-01
+Population.raw.value                                           1.872e-08
+Food.Insecurity.numerator                                      1.666e-07
+Frequent.Mental.Distress.raw.value:Food.Insecurity.raw.value   1.236e+01
+Food.Insecurity.raw.value:Poor.Physical.Health.Days.raw.value  4.376e-01
+Poor.or.Fair.Health.raw.value:Physical.Inactivity.raw.value    1.765e+00
+Population.raw.value:Food.Insecurity.numerator                 1.010e-16
+                                                              t value Pr(&gt;|t|)
+(Intercept)                                                     3.386 0.000718
+Frequent.Mental.Distress.raw.value                             19.304  &lt; 2e-16
+Food.Insecurity.raw.value                                       7.061 2.03e-12
+Poor.Physical.Health.Days.raw.value                             5.776 8.37e-09
+Poor.or.Fair.Health.raw.value                                  -5.629 1.97e-08
+Physical.Inactivity.raw.value                                 -15.916  &lt; 2e-16
+Population.raw.value                                            2.857 0.004307
+Food.Insecurity.numerator                                      -1.902 0.057317
+Frequent.Mental.Distress.raw.value:Food.Insecurity.raw.value   -0.211 0.832852
+Food.Insecurity.raw.value:Poor.Physical.Health.Days.raw.value  -3.412 0.000653
+Poor.or.Fair.Health.raw.value:Physical.Inactivity.raw.value     6.375 2.10e-10
+Population.raw.value:Food.Insecurity.numerator                 -6.147 8.89e-10
+                                                                 
+(Intercept)                                                   ***
+Frequent.Mental.Distress.raw.value                            ***
+Food.Insecurity.raw.value                                     ***
+Poor.Physical.Health.Days.raw.value                           ***
+Poor.or.Fair.Health.raw.value                                 ***
+Physical.Inactivity.raw.value                                 ***
+Population.raw.value                                          ** 
+Food.Insecurity.numerator                                     .  
+Frequent.Mental.Distress.raw.value:Food.Insecurity.raw.value     
+Food.Insecurity.raw.value:Poor.Physical.Health.Days.raw.value ***
+Poor.or.Fair.Health.raw.value:Physical.Inactivity.raw.value   ***
+Population.raw.value:Food.Insecurity.numerator                ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1952 on 3183 degrees of freedom
+Multiple R-squared:  0.8992,    Adjusted R-squared:  0.8989 
+F-statistic:  2582 on 11 and 3183 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggfortify)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(mod2, <span class="at">ncol =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Mental_Health_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="model-3" class="level3">
+<h3 class="anchored" data-anchor-id="model-3">Model 3</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span> (Frequent.Mental.Distress.raw.value <span class="sc">*</span> Food.Insecurity.raw.value) <span class="sc">+</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>             (Food.Insecurity.raw.value <span class="sc">*</span> Poor.Physical.Health.Days.raw.value) <span class="sc">+</span> (Poor.or.Fair.Health.raw.value <span class="sc">*</span> Physical.Inactivity.raw.value) <span class="sc">+</span> Frequent.Mental.Distress.raw.value <span class="sc">+</span> (Population.raw.value <span class="sc">*</span> Food.Insecurity.numerator)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>             , <span class="at">data =</span> mental)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">glance</span>(mod3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1     0.899         0.899 0.195     2582.       0    11   692. -1359. -1280.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggfortify)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(mod3, <span class="at">ncol =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Mental_Health_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>coefplot<span class="sc">::</span><span class="fu">coefplot</span>(mod3, <span class="at">intercept =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 methods overwritten by 'useful':
+  method         from     
+  autoplot.acf   ggfortify
+  fortify.acf    ggfortify
+  fortify.kmeans ggfortify
+  fortify.ts     ggfortify</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Mental_Health_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="model-4" class="level3">
+<h3 class="anchored" data-anchor-id="model-4">Model 4:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>mod4 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span> (Frequent.Mental.Distress.raw.value <span class="sc">*</span> Food.Insecurity.raw.value) <span class="sc">+</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>             (Food.Insecurity.raw.value <span class="sc">*</span> Poor.Physical.Health.Days.raw.value) <span class="sc">+</span> (Poor.or.Fair.Health.raw.value <span class="sc">*</span> Physical.Inactivity.raw.value) <span class="sc">+</span> Frequent.Mental.Distress.raw.value</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>             , <span class="at">data =</span> mental)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">glance</span>(mod4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1     0.898         0.898 0.196     3502.       0     8   672. -1323. -1262.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(mod4)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="model-5" class="level3">
+<h3 class="anchored" data-anchor-id="model-5">Model 5</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>mod5 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span>  Frequent.Mental.Distress.raw.value <span class="sc">+</span> Food.Insecurity.raw.value</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>             , <span class="at">data =</span> mental)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>mod5 <span class="sc">%&gt;%</span> broom<span class="sc">::</span><span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik   AIC   BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     0.868         0.868 0.223    10502.       0     2   262. -517. -492.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">#mod1$terms</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(mod5)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="model-6" class="level3">
+<h3 class="anchored" data-anchor-id="model-6">Model 6</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>mod6 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span>  Frequent.Mental.Distress.raw.value <span class="sc">+</span> Adult.Smoking.raw.value <span class="sc">+</span> Physical.Inactivity.raw.value <span class="sc">+</span> Adult.Obesity.raw.value</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>             , <span class="at">data =</span> mental)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>mod6 <span class="sc">%&gt;%</span> broom<span class="sc">::</span><span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1     0.905         0.905 0.189     7584.       0     4   784. -1556. -1520.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#mod1$terms</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(mod6)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod6)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Poor.Mental.Health.Days.raw.value ~ Frequent.Mental.Distress.raw.value + 
+    Adult.Smoking.raw.value + Physical.Inactivity.raw.value + 
+    Adult.Obesity.raw.value, data = mental)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.63842 -0.12140 -0.00568  0.11665  0.93457 
+
+Coefficients:
+                                   Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                         0.57518    0.03938  14.605   &lt;2e-16 ***
+Frequent.Mental.Distress.raw.value 34.03215    0.27601 123.299   &lt;2e-16 ***
+Adult.Smoking.raw.value            -2.45271    0.17028 -14.404   &lt;2e-16 ***
+Physical.Inactivity.raw.value      -1.13011    0.13111  -8.619   &lt;2e-16 ***
+Adult.Obesity.raw.value            -1.12294    0.11872  -9.459   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1895 on 3190 degrees of freedom
+Multiple R-squared:  0.9048,    Adjusted R-squared:  0.9047 
+F-statistic:  7584 on 4 and 3190 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+</section>
+<section id="model-7---includes-high-correlated-repsonses-and-new-negative-correlations" class="level3">
+<h3 class="anchored" data-anchor-id="model-7---includes-high-correlated-repsonses-and-new-negative-correlations">Model 7 -&gt; includes high correlated repsonses and New negative correlations</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Model 7</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>mod7 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span>  Frequent.Mental.Distress.raw.value <span class="sc">+</span> Adult.Smoking.raw.value <span class="sc">+</span> Physical.Inactivity.raw.value <span class="sc">+</span> Adult.Obesity.raw.value <span class="sc">+</span> Excessive.Drinking.raw.value <span class="sc">+</span> Broadband.Access.raw.value <span class="sc">+</span> X..Asian.raw.value <span class="sc">+</span> Social.Associations.raw.value</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>             , <span class="at">data =</span> mental)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>mod7 <span class="sc">%&gt;%</span> broom<span class="sc">::</span><span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1     0.911         0.910 0.184     4060.       0     8   885. -1750. -1689.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#mod1$terms</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(mod6)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>car<span class="sc">::</span><span class="fu">vif</span>(mod7)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Frequent.Mental.Distress.raw.value            Adult.Smoking.raw.value 
+                          4.264867                           5.228002 
+     Physical.Inactivity.raw.value            Adult.Obesity.raw.value 
+                          4.985173                           2.957416 
+      Excessive.Drinking.raw.value         Broadband.Access.raw.value 
+                          2.144031                           1.890126 
+                X..Asian.raw.value      Social.Associations.raw.value 
+                          1.396634                           1.111857 </code></pre>
+</div>
+</div>
+</section>
+<section id="model-8---include-interactive-terms-to-help-further-reduce-bic-and-increase-adjusted-r2" class="level3">
+<h3 class="anchored" data-anchor-id="model-8---include-interactive-terms-to-help-further-reduce-bic-and-increase-adjusted-r2">Model 8 -&gt; include interactive terms to help further reduce BIC and increase adjusted R^2</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Model 8</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>mod8 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span>  Frequent.Mental.Distress.raw.value <span class="sc">+</span> Adult.Smoking.raw.value <span class="sc">+</span> Physical.Inactivity.raw.value <span class="sc">+</span> Adult.Obesity.raw.value <span class="sc">+</span> Excessive.Drinking.raw.value <span class="sc">+</span> Broadband.Access.raw.value <span class="sc">+</span> X..Asian.raw.value <span class="sc">+</span> Social.Associations.raw.value <span class="sc">+</span> Poor.Physical.Health.Days.raw.value <span class="sc">+</span> Poor.or.Fair.Health.raw.value</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>             , <span class="at">data =</span> mental)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>mod8 <span class="sc">%&gt;%</span> broom<span class="sc">::</span><span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1     0.912         0.912 0.182     3305.       0    10   911. -1799. -1726.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod8)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Poor.Mental.Health.Days.raw.value ~ Frequent.Mental.Distress.raw.value + 
+    Adult.Smoking.raw.value + Physical.Inactivity.raw.value + 
+    Adult.Obesity.raw.value + Excessive.Drinking.raw.value + 
+    Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value + 
+    Poor.Physical.Health.Days.raw.value + Poor.or.Fair.Health.raw.value, 
+    data = mental)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.66152 -0.11319 -0.00302  0.11581  0.84010 
+
+Coefficients:
+                                      Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                         -0.3350066  0.0908597  -3.687 0.000231 ***
+Frequent.Mental.Distress.raw.value  32.8182030  0.4670056  70.274  &lt; 2e-16 ***
+Adult.Smoking.raw.value             -2.6650032  0.1859956 -14.328  &lt; 2e-16 ***
+Physical.Inactivity.raw.value       -1.0615109  0.1770760  -5.995 2.27e-09 ***
+Adult.Obesity.raw.value             -0.5564421  0.1222988  -4.550 5.57e-06 ***
+Excessive.Drinking.raw.value         1.6194371  0.1798217   9.006  &lt; 2e-16 ***
+Broadband.Access.raw.value           0.2324193  0.0639242   3.636 0.000281 ***
+X..Asian.raw.value                   1.0983566  0.1223781   8.975  &lt; 2e-16 ***
+Social.Associations.raw.value       -0.0013067  0.0006171  -2.117 0.034307 *  
+Poor.Physical.Health.Days.raw.value  0.1532213  0.0215831   7.099 1.54e-12 ***
+Poor.or.Fair.Health.raw.value       -0.7747515  0.2572243  -3.012 0.002616 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1822 on 3184 degrees of freedom
+Multiple R-squared:  0.9121,    Adjusted R-squared:  0.9119 
+F-statistic:  3305 on 10 and 3184 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggfortify)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(mod8, <span class="at">ncol =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Mental_Health_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="model-9---adding-ratio-of-pop-to-mental-health-providers-from-model-8" class="level3">
+<h3 class="anchored" data-anchor-id="model-9---adding-ratio-of-pop-to-mental-health-providers-from-model-8">Model 9 -&gt; adding ratio of pop to mental health providers from model 8</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Model 9</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>mod9 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span>  Frequent.Mental.Distress.raw.value <span class="sc">+</span> Adult.Smoking.raw.value <span class="sc">+</span> Physical.Inactivity.raw.value <span class="sc">+</span> Adult.Obesity.raw.value <span class="sc">+</span> Excessive.Drinking.raw.value <span class="sc">+</span> Broadband.Access.raw.value <span class="sc">+</span> X..Asian.raw.value <span class="sc">+</span> Social.Associations.raw.value <span class="sc">+</span> Poor.Physical.Health.Days.raw.value <span class="sc">+</span> Poor.or.Fair.Health.raw.value <span class="sc">+</span> Ratio.of.population.to.mental.health.providers.</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>             , <span class="at">data =</span> mental)</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>mod9 <span class="sc">%&gt;%</span> broom<span class="sc">::</span><span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1     0.908         0.907 0.184     2677.       0    11   832. -1637. -1559.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="model-10---all-predictors-from-df---mental" class="level3">
+<h3 class="anchored" data-anchor-id="model-10---all-predictors-from-df---mental">Model 10 -&gt; All predictors from df -&gt; mental</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Model 10</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>mod10 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span>  . , <span class="at">data =</span> mental)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>mod10 <span class="sc">%&gt;%</span> broom<span class="sc">::</span><span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic p.value    df logLik    AIC   BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+1     0.998         0.844 0.205      6.46 0.00669   634  1558. -1844.  995.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="combined-model-evaluation" class="level3">
+<h3 class="anchored" data-anchor-id="combined-model-evaluation">Combined Model Evaluation:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>extract_metrics <span class="ot">&lt;-</span> <span class="cf">function</span>(mod, mod_name)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  broom<span class="sc">::</span><span class="fu">glance</span>(mod) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">mod_name =</span> mod_name)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>all_metrics <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map2_dfr</span>(<span class="fu">list</span>(mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8, mod9, mod10),</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>),</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>                               extract_metrics)</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>all_metrics <span class="sc">%&gt;%</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 10
+Columns: 13
+$ r.squared     &lt;dbl&gt; 0.9064638, 0.8992108, 0.8992108, 0.8978922, 0.8680758, 0…
+$ adj.r.squared &lt;dbl&gt; 0.9054574, 0.8988624, 0.8988624, 0.8976358, 0.8679932, 0…
+$ sigma         &lt;dbl&gt; 0.1887262, 0.1951977, 0.1951977, 0.1963778, 0.2230061, 0…
+$ statistic     &lt;dbl&gt; 900.697584, 2581.613713, 2581.613713, 3502.041191, 10501…
+$ p.value       &lt;dbl&gt; 0.000000000, 0.000000000, 0.000000000, 0.000000000, 0.00…
+$ df            &lt;dbl&gt; 34, 11, 11, 8, 2, 4, 8, 10, 11, 634
+$ logLik        &lt;dbl&gt; 811.6162, 692.3097, 692.3097, 671.5468, 262.2696, 784.21…
+$ AIC           &lt;dbl&gt; -1551.2325, -1358.6193, -1358.6193, -1323.0936, -516.539…
+$ BIC           &lt;dbl&gt; -1332.7361, -1279.7179, -1279.7179, -1262.4002, -492.261…
+$ deviance      &lt;dbl&gt; 112.5515477, 121.2791145, 121.2791145, 122.8656783, 158.…
+$ df.residual   &lt;int&gt; 3160, 3183, 3183, 3186, 3192, 3190, 3186, 3184, 2998, 7
+$ nobs          &lt;int&gt; 3195, 3195, 3195, 3195, 3195, 3195, 3195, 3195, 3010, 642
+$ mod_name      &lt;chr&gt; "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"</code></pre>
+</div>
+</div>
+</section>
+<section id="model-10-is-absurdly-horrible-and-much-more-complex-compared-to-the-other-models-so-lets-get-a-closer-look-on-the-other-models-disregarding-model-10" class="level3">
+<h3 class="anchored" data-anchor-id="model-10-is-absurdly-horrible-and-much-more-complex-compared-to-the-other-models-so-lets-get-a-closer-look-on-the-other-models-disregarding-model-10">Model 10 is absurdly horrible and much more complex compared to the other models so let’s get a closer look on the other models, disregarding model 10</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>all_metrics <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map2_dfr</span>(<span class="fu">list</span>(mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8, mod9),</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>),</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>                               extract_metrics)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>all_metrics <span class="sc">%&gt;%</span> </span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(mod_name, df, adj.r.squared, AIC, BIC) <span class="sc">%&gt;%</span> </span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">!</span><span class="fu">c</span>(<span class="st">"mod_name"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mod_name, <span class="at">y =</span> value)) <span class="sc">+</span></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>name, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Mental_Health_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>all_metrics <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map2_dfr</span>(<span class="fu">list</span>(mod6, mod7, mod8),</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">as.character</span>(<span class="dv">6</span><span class="sc">:</span><span class="dv">8</span>),</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>                               extract_metrics)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>all_metrics <span class="sc">%&gt;%</span> </span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(mod_name, df, adj.r.squared, AIC, BIC) <span class="sc">%&gt;%</span> </span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">!</span><span class="fu">c</span>(<span class="st">"mod_name"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mod_name, <span class="at">y =</span> value)) <span class="sc">+</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>name, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Mental_Health_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="model-7-seems-to-be-the-best---so-lets-see-how-it-does-predicting-response" class="level3">
+<h3 class="anchored" data-anchor-id="model-7-seems-to-be-the-best---so-lets-see-how-it-does-predicting-response">Model 7 seems to be the best -&gt; so let’s see how it does predicting response</h3>
+</section>
+<section id="lets-see-how-well-model-8-does-with-making-predictions" class="level3">
+<h3 class="anchored" data-anchor-id="lets-see-how-well-model-8-does-with-making-predictions">Let’s see how well model 8 does with making predictions…</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>mod_7_pred <span class="ot">&lt;-</span> mental <span class="sc">|&gt;</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Mental_Health_Days_predicted_vals =</span> <span class="fu">predict</span>(mod7)) <span class="sc">|&gt;</span> </span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Mental_Health_Days_predicted_vals, <span class="at">y =</span> Poor.Mental.Health.Days.raw.value)) <span class="sc">+</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">'darkblue'</span>) <span class="sc">+</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, </span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">color =</span> <span class="st">"gold2"</span>,</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Actual Mental Health Days"</span>,</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Mental Health Days Predicted Values"</span>,</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Model 7 Prediction Plot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>mod_8_pred <span class="ot">&lt;-</span> mental <span class="sc">|&gt;</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Mental_Health_Days_predicted_vals =</span> <span class="fu">predict</span>(mod8)) <span class="sc">|&gt;</span> </span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Mental_Health_Days_predicted_vals, <span class="at">y =</span> Poor.Mental.Health.Days.raw.value)) <span class="sc">+</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">'darkblue'</span>) <span class="sc">+</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, </span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">color =</span> <span class="st">"gold2"</span>,</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Actual Mental Health Days"</span>,</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Mental Health Days Predicted Values"</span>,</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Model 8 Prediction Plot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="overfitting" class="level1">
+<h1>Overfitting?</h1>
+</section>
+<section id="test-train-split-5-fold-cross-validation-80-20" class="level1">
+<h1>Test + Train Split: 5-fold Cross-Validation (80-20):</h1>
+<section id="verify-each-column-got-assigned-a-fold" class="level3">
+<h3 class="anchored" data-anchor-id="verify-each-column-got-assigned-a-fold">Verify each column got assigned a fold</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>mental <span class="sc">%&gt;%</span> <span class="fu">count</span>(fold_id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  fold_id   n
+1       1 639
+2       2 639
+3       3 639
+4       4 639
+5       5 639</code></pre>
+</div>
+</div>
+</section>
+<section id="model-7" class="level3">
+<h3 class="anchored" data-anchor-id="model-7">Model 7</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>models_cv <span class="ot">&lt;-</span> <span class="cf">function</span>(k) {</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span> mental <span class="sc">|&gt;</span> </span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(fold_id <span class="sc">!=</span> k)</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span> mental <span class="sc">|&gt;</span> </span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(fold_id <span class="sc">==</span> k)</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>  mod_07_fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span>  Frequent.Mental.Distress.raw.value <span class="sc">+</span> Adult.Smoking.raw.value <span class="sc">+</span> Physical.Inactivity.raw.value <span class="sc">+</span> Adult.Obesity.raw.value <span class="sc">+</span> Excessive.Drinking.raw.value <span class="sc">+</span> Broadband.Access.raw.value <span class="sc">+</span> X..Asian.raw.value <span class="sc">+</span> Social.Associations.raw.value,</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> train_data)</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>  mod_07_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod_07_fit, <span class="at">newdata =</span> test_data)</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># return a table with RMSE and fold id</span></span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>  rmse_result <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">rmse =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((test_data<span class="sc">$</span>Poor.Mental.Health.Days.raw.value <span class="sc">-</span> mod_07_pred) <span class="sc">^</span> <span class="dv">2</span>)), </span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>                        <span class="at">fold_id =</span> k)</span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rmse_result)</span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>mod7_cv_results <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span>n_folds, models_cv) <span class="sc">|&gt;</span> </span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="model-8" class="level3">
+<h3 class="anchored" data-anchor-id="model-8">Model 8</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>models_cv <span class="ot">&lt;-</span> <span class="cf">function</span>(k) {</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span> mental <span class="sc">|&gt;</span> </span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(fold_id <span class="sc">!=</span> k)</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span> mental <span class="sc">|&gt;</span> </span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(fold_id <span class="sc">==</span> k)</span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>  mod_08_fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span>  Frequent.Mental.Distress.raw.value <span class="sc">+</span> Adult.Smoking.raw.value <span class="sc">+</span> Physical.Inactivity.raw.value <span class="sc">+</span> Adult.Obesity.raw.value <span class="sc">+</span> Excessive.Drinking.raw.value <span class="sc">+</span> Broadband.Access.raw.value <span class="sc">+</span> X..Asian.raw.value <span class="sc">+</span> Social.Associations.raw.value <span class="sc">+</span> Poor.Physical.Health.Days.raw.value <span class="sc">+</span> Poor.or.Fair.Health.raw.value,</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> train_data)</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>  mod_08_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod_08_fit, <span class="at">newdata =</span> test_data)</span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># return a table with RMSE and fold id</span></span>
+<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a>  rmse_result <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">rmse =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((test_data<span class="sc">$</span>Poor.Mental.Health.Days.raw.value <span class="sc">-</span> mod_08_pred) <span class="sc">^</span> <span class="dv">2</span>)), </span>
+<span id="cb58-15"><a href="#cb58-15" aria-hidden="true" tabindex="-1"></a>                        <span class="at">fold_id =</span> k)</span>
+<span id="cb58-16"><a href="#cb58-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rmse_result)</span>
+<span id="cb58-17"><a href="#cb58-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb58-18"><a href="#cb58-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-19"><a href="#cb58-19" aria-hidden="true" tabindex="-1"></a>mod8_cv_results <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span>n_folds, models_cv) <span class="sc">|&gt;</span> </span>
+<span id="cb58-20"><a href="#cb58-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Model 7 and Model 8 RMSE… IS there really a difference?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>mod7_cv_results <span class="sc">|&gt;</span> </span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_rmse =</span> <span class="fu">mean</span>(rmse))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 1
+  avg_rmse
+     &lt;dbl&gt;
+1    0.184</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>mod8_cv_results <span class="sc">|&gt;</span> </span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_rmse =</span> <span class="fu">mean</span>(rmse))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 1
+  avg_rmse
+     &lt;dbl&gt;
+1    0.183</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="model-7-deems-to-be-the-best-model" class="level1">
+<h1>Model 7 deems to be the best model!!</h1>
+<section id="lets-see-if-it-overfits-or-not" class="level2">
+<h2 class="anchored" data-anchor-id="lets-see-if-it-overfits-or-not">Let’s see if it overfits or not:</h2>
+<section id="train-model-7-specifically" class="level3">
+<h3 class="anchored" data-anchor-id="train-model-7-specifically">Train Model 7 Specifically</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: lattice</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'caret'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:purrr':
+
+    lift</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3239</span>)</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>train_control <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">"cv"</span>, <span class="at">number =</span> <span class="dv">5</span>) <span class="co"># 5 fold CV</span></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>cv_mod_7 <span class="ot">&lt;-</span> <span class="fu">train</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span>  Frequent.Mental.Distress.raw.value <span class="sc">+</span> Adult.Smoking.raw.value <span class="sc">+</span> Physical.Inactivity.raw.value <span class="sc">+</span> Adult.Obesity.raw.value <span class="sc">+</span> Excessive.Drinking.raw.value <span class="sc">+</span> Broadband.Access.raw.value <span class="sc">+</span> X..Asian.raw.value <span class="sc">+</span> Social.Associations.raw.value, </span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> mental, </span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">method =</span> <span class="st">"lm"</span>, </span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">trControl =</span> train_control)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="make-predictions" class="level3">
+<h3 class="anchored" data-anchor-id="make-predictions">Make predictions</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>mental<span class="sc">$</span>predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(cv_mod_7, <span class="at">newdata =</span> mental)</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>mental <span class="sc">%&gt;%</span></span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Poor.Mental.Health.Days.raw.value, <span class="at">y =</span> predictions)) <span class="sc">+</span></span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Actual vs Predicted Values"</span>) <span class="sc">+</span></span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Actual Values"</span>) <span class="sc">+</span></span>
+<span id="cb68-9"><a href="#cb68-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Predicted Values"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Mental_Health_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="very-well-in-terms-of-predictions-on-the-test-data-with-the-train-data-to-the-model-model-7" class="level3">
+<h3 class="anchored" data-anchor-id="very-well-in-terms-of-predictions-on-the-test-data-with-the-train-data-to-the-model-model-7">Very well in terms of predictions on the test data with the train data to the model (model 7)</h3>
+</section>
+<section id="however-lets-assess-if-model-is-overfitting-before-celebrating" class="level3">
+<h3 class="anchored" data-anchor-id="however-lets-assess-if-model-is-overfitting-before-celebrating">However, let’s assess if model is Overfitting before celebrating…</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Split the data into 80% training and 20% test sets</span></span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3239</span>)</span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>trainIndex <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(mental<span class="sc">$</span>Poor.Mental.Health.Days.raw.value, <span class="at">p =</span> <span class="fl">0.8</span>, <span class="at">list =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>trainData <span class="ot">&lt;-</span> mental[trainIndex, ]</span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>testData <span class="ot">&lt;-</span> mental[<span class="sc">-</span>trainIndex, ]</span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the model on the training data with 5-fold cross-validation and hyperparameter tuning</span></span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>train_control <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">"cv"</span>, <span class="at">number =</span> <span class="dv">5</span>)</span>
+<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the grid of hyperparameters for tuning</span></span>
+<span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a>tune_grid <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">alpha =</span> <span class="dv">1</span>,  <span class="co"># Lasso regression</span></span>
+<span id="cb69-14"><a href="#cb69-14" aria-hidden="true" tabindex="-1"></a>                         <span class="at">lambda =</span> <span class="fu">seq</span>(<span class="fl">0.001</span>, <span class="fl">0.1</span>, <span class="at">by =</span> <span class="fl">0.001</span>))</span>
+<span id="cb69-15"><a href="#cb69-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-16"><a href="#cb69-16" aria-hidden="true" tabindex="-1"></a>cv_mod_7 <span class="ot">&lt;-</span> <span class="fu">train</span>(Poor.Mental.Health.Days.raw.value <span class="sc">~</span> Frequent.Mental.Distress.raw.value <span class="sc">+</span> Adult.Smoking.raw.value <span class="sc">+</span> Physical.Inactivity.raw.value <span class="sc">+</span> Adult.Obesity.raw.value <span class="sc">+</span> Excessive.Drinking.raw.value <span class="sc">+</span> Broadband.Access.raw.value <span class="sc">+</span> X..Asian.raw.value <span class="sc">+</span> Social.Associations.raw.value, </span>
+<span id="cb69-17"><a href="#cb69-17" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> trainData, </span>
+<span id="cb69-18"><a href="#cb69-18" aria-hidden="true" tabindex="-1"></a>                  <span class="at">method =</span> <span class="st">"glmnet"</span>, </span>
+<span id="cb69-19"><a href="#cb69-19" aria-hidden="true" tabindex="-1"></a>                  <span class="at">trControl =</span> train_control, </span>
+<span id="cb69-20"><a href="#cb69-20" aria-hidden="true" tabindex="-1"></a>                  <span class="at">tuneGrid =</span> tune_grid)</span>
+<span id="cb69-21"><a href="#cb69-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-22"><a href="#cb69-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Make predictions on the training and test data</span></span>
+<span id="cb69-23"><a href="#cb69-23" aria-hidden="true" tabindex="-1"></a>train_predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(cv_mod_7, <span class="at">newdata =</span> trainData)</span>
+<span id="cb69-24"><a href="#cb69-24" aria-hidden="true" tabindex="-1"></a>test_predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(cv_mod_7, <span class="at">newdata =</span> testData)</span>
+<span id="cb69-25"><a href="#cb69-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-26"><a href="#cb69-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate the model on training data</span></span>
+<span id="cb69-27"><a href="#cb69-27" aria-hidden="true" tabindex="-1"></a>train_r_squared <span class="ot">&lt;-</span> <span class="fu">cor</span>(trainData<span class="sc">$</span>Poor.Mental.Health.Days.raw.value, train_predictions)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb69-28"><a href="#cb69-28" aria-hidden="true" tabindex="-1"></a>train_mae <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(trainData<span class="sc">$</span>Poor.Mental.Health.Days.raw.value <span class="sc">-</span> train_predictions))</span>
+<span id="cb69-29"><a href="#cb69-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-30"><a href="#cb69-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate the model on test data</span></span>
+<span id="cb69-31"><a href="#cb69-31" aria-hidden="true" tabindex="-1"></a>test_r_squared <span class="ot">&lt;-</span> <span class="fu">cor</span>(testData<span class="sc">$</span>Poor.Mental.Health.Days.raw.value, test_predictions)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb69-32"><a href="#cb69-32" aria-hidden="true" tabindex="-1"></a>test_mae <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(testData<span class="sc">$</span>Poor.Mental.Health.Days.raw.value <span class="sc">-</span> test_predictions))</span>
+<span id="cb69-33"><a href="#cb69-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-34"><a href="#cb69-34" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Train R-squared:"</span>, train_r_squared, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train R-squared: 0.9120494 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Train MAE:"</span>, train_mae, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train MAE: 0.1424844 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Test R-squared:"</span>, test_r_squared, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test R-squared: 0.9046873 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Test MAE:"</span>, test_mae, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test MAE: 0.147697 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot predictions vs actual values for training and test data</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> trainData<span class="sc">$</span>Poor.Mental.Health.Days.raw.value, <span class="at">y =</span> train_predictions, <span class="at">color =</span> <span class="st">"Train"</span>), <span class="at">alpha =</span> <span class="fl">0.75</span>) <span class="sc">+</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> testData<span class="sc">$</span>Poor.Mental.Health.Days.raw.value, <span class="at">y =</span> test_predictions, <span class="at">color =</span> <span class="st">"Test"</span>), <span class="at">alpha =</span> <span class="fl">0.75</span>) <span class="sc">+</span></span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Actual vs Predicted Values"</span>) <span class="sc">+</span></span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Actual Values"</span>) <span class="sc">+</span></span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Predicted Values"</span>) <span class="sc">+</span></span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Data"</span>, <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Train"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"Test"</span> <span class="ot">=</span> <span class="st">"orange"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Mental_Health_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If the training points were significantly closer to the line than the test points, it would suggest overfitting. However, in this case, both sets of points seem to follow the line closely, indicating that the model generalizes well to unseen data.</p>
+</section>
+<section id="conclusion-model-7-is-the-best-model-to-use" class="level3">
+<h3 class="anchored" data-anchor-id="conclusion-model-7-is-the-best-model-to-use">Conclusion: Model 7 is the best model to use:</h3>
+<p>Predictors contained in model 7</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>mod7<span class="sc">$</span>coefficients</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                       (Intercept) Frequent.Mental.Distress.raw.value 
+                       -0.31649403                        35.26089272 
+           Adult.Smoking.raw.value      Physical.Inactivity.raw.value 
+                       -2.39518350                        -0.97163912 
+           Adult.Obesity.raw.value       Excessive.Drinking.raw.value 
+                       -0.66485523                         1.52121004 
+        Broadband.Access.raw.value                 X..Asian.raw.value 
+                        0.25453568                         1.05239530 
+     Social.Associations.raw.value 
+                       -0.00248012 </code></pre>
+</div>
+</div>
+<p>summary/signifigance:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod7)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Poor.Mental.Health.Days.raw.value ~ Frequent.Mental.Distress.raw.value + 
+    Adult.Smoking.raw.value + Physical.Inactivity.raw.value + 
+    Adult.Obesity.raw.value + Excessive.Drinking.raw.value + 
+    Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value, 
+    data = mental)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.61985 -0.11732 -0.00392  0.11858  0.87747 
+
+Coefficients:
+                                    Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                        -0.316494   0.091529  -3.458 0.000552 ***
+Frequent.Mental.Distress.raw.value 35.260893   0.316111 111.546  &lt; 2e-16 ***
+Adult.Smoking.raw.value            -2.395183   0.180812 -13.247  &lt; 2e-16 ***
+Physical.Inactivity.raw.value      -0.971639   0.138768  -7.002 3.07e-12 ***
+Adult.Obesity.raw.value            -0.664855   0.122143  -5.443 5.63e-08 ***
+Excessive.Drinking.raw.value        1.521210   0.180633   8.422  &lt; 2e-16 ***
+Broadband.Access.raw.value          0.254536   0.062021   4.104 4.16e-05 ***
+X..Asian.raw.value                  1.052395   0.120787   8.713  &lt; 2e-16 ***
+Social.Associations.raw.value      -0.002480   0.000588  -4.218 2.54e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1837 on 3186 degrees of freedom
+Multiple R-squared:  0.9107,    Adjusted R-squared:  0.9104 
+F-statistic:  4060 on 8 and 3186 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
