@@ -1,0 +1,412 @@
+
+```{r, include = FALSE}
+library(caret)
+library(tidyverse)
+library(janitor)
+```
+
+### Get the specific data for Arkansas since it has the biggest data amongst the other 2 states:
+
+```{r, include = FALSE}
+csv <- "analyticdata2024 - clean_data.csv"
+
+mental <- read.csv(csv, header = TRUE)
+
+### Clean data columns
+mental %>% clean_names()
+
+arkansas <- mental %>% filter(State.Abbreviation == "SD" & !Name == "South Dakota") 
+
+arkansas
+```
+
+Correlation Matrices for the features and response themselves:
+```{r}
+arkansas_filtered <- arkansas %>% select(where(is.numeric))
+
+cor_matrix <- cor(arkansas_filtered)
+
+correlations <- reshape2:: melt(cor_matrix, na.rm = TRUE)
+
+cor_feature <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter( (value > 0.70 & value < 1) | value < -0.70)
+
+
+cor_response <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter(Var2 == "Poor.Mental.Health.Days.raw.value")
+
+
+```
+
+### top 10 most correlated amongst features:
+```{r}
+cor_feature %>% arrange(-abs(value)) %>% head(10)
+```
+
+### top 10 most correlated amongst response:
+```{r}
+cor_response %>% arrange(-abs(value)) %>% head(10)
+```
+
+
+specify the resampling scheme that caret will use to train, assess, and tune the several models in this r file:
+Splitting 80-20 so we can make predictions on the new data later on
+```{r, include = FALSE}
+set.seed(2811)
+train <- arkansas |> 
+  slice_sample(prop = 0.8)
+test <- arkansas |> 
+  anti_join(train)
+
+my_ctrl <- trainControl(method = 'repeatedcv', number = 5)
+metric_acc <- "RMSE"
+
+```
+
+### Previously, we identified model 6 was the most practical model, so let's tune that
+### Likewise, model 7 was a close 2nd candidate, so let's also tune to see how it compares
+### And for comparasion, let's do model one which was the most complex and had several interactions and predictors
+
+### First, let's tune our linear models - 6 and 7
+```{r}
+mod_6_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                     data = train,
+                     method = 'lm',
+                     preProcess = c("center", "scale"),
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+
+
+mod_7_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                     data = train,
+                     method = 'lm',
+                     preProcess = c("center", "scale"),
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+summary(mod_6_tune)
+```
+
+
+```{r}
+scaler <- train %>% select(where(is.numeric), -Poor.Mental.Health.Days.raw.value) |> scale()
+train <- train |> select(Poor.Mental.Health.Days.raw.value) |> bind_cols(scaler)
+
+mod6 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
+
+             
+             , data = train)
+
+#mod6 %>% broom::glance()
+
+#mod1$terms
+
+#summary(mod6)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+tab_model(mod6)
+```
+
+```{r}
+coefplot::coefplot(mod6, intercept = FALSE)
+```
+
+### Now, the elastic tuned models:
+
+```{r}
+enet_default_6 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                     data = arkansas,
+                     method = 'glmnet',
+                     preProcess = c("center", "scale"),
+                     tuneLength = 10,
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+
+
+enet_default_7 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                     data = train,
+                     method = 'glmnet',
+                     preProcess = c("center", "scale"),
+                     tuneLength = 10,
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+
+enet_default_complex <- train(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+             (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value * Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value * Frequent.Mental.Distress.raw.value) + (Population.raw.value * Food.Insecurity.numerator),
+                     data = train,
+                     method = 'glmnet',
+                     preProcess = c("center", "scale"),
+                     tuneLength = 10,
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+```
+
+## Model 6 Elastic Tuned Net Model Eval:
+
+```{r}
+ggplot(enet_default_6)
+```
+
+Best Model after being tuned
+```{r}
+enet_default_6$bestTune
+```
+
+Model 6 coefficents:
+
+```{r}
+coef(enet_default_6$finalModel, s = enet_default_6$bestTune$lambda)
+```
+None of the coefficents got turned off, seems like all were significant
+
+
+## Model 7 Elastic Net Model:
+```{r}
+coef(enet_default_7$finalModel, s = enet_default_7$bestTune$lambda)
+
+```
+Adult.Smoking.raw.value coefficent got turned off (as indicated by the .)           .          
+```{r}
+enet_default_7$bestTune
+```
+```{r}
+ggplot(enet_default_7)
+```
+
+## Complex Elastic Tuned Model (34 df):
+
+```{r}
+enet_default_complex$bestTune
+
+```
+```{r}
+head(coef(enet_default_complex$finalModel, s = enet_default_complex$bestTune$lambda), 29)
+```
+
+Not even looking at all the coefficents, majority of them are turned off... awful... 
+
+### Model 6 and 7 appear to be very similar to one another despite model 6 being half as complex as model 7...
+
+Results for model 6 elastic tuned
+```{r}
+enet_default_6$results %>% arrange(RMSE) %>% head(10)
+```
+
+
+
+
+### Let's go more complex... (rf, GBM)
+
+### Random Forest For Mod 6 Predictors:
+```{r}
+set.seed(3231)
+
+rf_mod_6 <- caret::train(
+  Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value ,
+  data = train,
+  method = 'rf',
+  metric = metric_acc,
+  trControl = my_ctrl,
+  importance = TRUE
+)
+
+rf_mod_6
+```
+all 4 predictors seem to be the best... let's see their importance
+
+```{r}
+varImp(rf_mod_6) %>%
+  ggplot(aes(x = Overall, y = Relevance, color = Overall)) +
+  geom_point(size = 3, color = "red")
+```
+
+
+```{r}
+set.seed(3231)
+
+rf_mod_7 <- caret::train(
+  Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+  data = train,
+  method = 'rf',
+  metric = metric_acc,
+  trControl = my_ctrl,
+  importance = TRUE
+)
+
+rf_mod_7
+```
+
+
+```{r}
+varImp(rf_mod_7) %>%
+  ggplot(aes(x = Overall, y = Relevance, color = Overall)) +
+  geom_point(size = 3, color = "red")
+```
+
+GBM -> Gradient Boosted Model
+```{r}
+set.seed(12341)
+fit_gbm_mod_6 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                      data = train,
+                      method = "gbm",
+                      metric = metric_acc,
+                      trControl = my_ctrl,
+                      verbose=FALSE)
+
+fit_gbm_mod_6
+```
+
+```{r}
+plot(fit_gbm_mod_6)
+```
+
+
+```{r}
+set.seed(12341)
+fit_gbm_mod_7 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                      data = train,
+                      method = "gbm",
+                      metric = metric_acc,
+                      trControl = my_ctrl,
+                      verbose=FALSE)
+
+fit_gbm_mod_7
+```
+
+```{r}
+plot(fit_gbm_mod_7)
+```
+
+
+Tuned Gradient Boosted Model (GBM)
+
+```{r}
+gbm_grid <- expand.grid(n.trees = c(10, 50, 100, 150, 200, 300, 400, 500),
+                        shrinkage = c(0.01, 0.05, 0.1),
+                        interaction.depth = fit_gbm_mod_6$bestTune$interaction.depth,
+                        n.minobsinnode = fit_gbm_mod_6$bestTune$n.minobsinnode)
+
+set.seed(12341)
+fit_gbm_tune <- train( Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                           data = train,
+                           method = "gbm",
+                           metric = metric_acc,
+                           tuneGrid = gbm_grid,
+                           trControl = my_ctrl,
+                           verbose=FALSE)
+fit_gbm_tune
+```
+
+```{r}
+plot(fit_gbm_tune)
+```
+
+Gam Models
+```{r}
+set.seed(3819)  # for reproducibility
+gam_model <- train(
+  Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value, 
+  data = train,
+  method = "gam",               
+  preProcess = c("center", "scale"),  
+  trControl = my_ctrl
+  )
+```
+
+```{r}
+gam_model
+```
+
+Model Evaluation:
+
+```{r}
+concrete_model_compare <- resamples(list(Elastic6 = enet_default_6,
+                                         Elastic7 = enet_default_7,
+                                         RF6 = rf_mod_6,
+                                         RF7 = rf_mod_7,
+                                         GAM6 = gam_model,
+                                         GBM6 = fit_gbm_mod_6,
+                                         GBM7 = fit_gbm_mod_7,
+                                         GBMTuned = fit_gbm_tune,
+                                         Linear6 = mod_6_tune,
+                                         Linear7 = mod_7_tune
+                                         )
+                                          )
+
+dotplot(concrete_model_compare, metric = "RMSE")
+```
+
+```{r}
+
+timings <- concrete_model_compare$timings$Everything
+
+results_summary <- summary(concrete_model_compare)
+
+metrics <- as.data.frame(results_summary$statistics)
+
+timings_df <- data.frame(Time_Efficiency = timings)
+
+combined_df <- cbind(metrics, timings_df)
+
+combined_df <- combined_df %>% select(MAE.Mean, RMSE.Mean, Rsquared.Mean, Time_Efficiency) %>% arrange(RMSE.Mean)
+```
+
+```{r}
+
+combined_df %>%
+  ggplot(aes(x = RMSE.Mean, y = Time_Efficiency, label = rownames(combined_df))) +
+  geom_point(color = 'darkblue', size = 2) +
+  geom_text(check_overlap = FALSE, color = "red", size = 4, hjust = -0.1, vjust = 0.5) +
+  labs(
+    y = "Time Efficiency (In Seconds)",
+    title = "South Dakota Model Performance Based On Time Efficiency Per Model",
+       x = "RMSE"
+  )  +
+    scale_x_continuous(limits = c(0.12, 0.30), breaks = seq(0.12, 0.30, by = 0.025)) +
+  
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"))
+
+
+```
+Model 6 Linear seems to be the most optimal (look at graph in view)
+
+
+
+```{r}
+### extract all of the resample fold performance metrics per model
+concrete_model_compare_lf <- concrete_model_compare$values  %>% tibble::as_tibble() %>%
+  pivot_longer(!c("Resample")) %>% 
+  tidyr::separate(name,
+                  c("model_name", "metric_name"),
+                  sep = "~") %>% filter(metric_name != "MAE")
+
+### visualize the performance metrics sumamries, show the individual
+### fold results with markers and the cross-validation average
+### and standard error, which model is better?
+concrete_model_compare_lf %>% 
+  ggplot(mapping = aes(x = model_name, y = value)) +
+  geom_point() +
+  stat_summary(fun.data = "mean_se",
+               color = "red",
+               fun.args = list(mult = 1)) +
+  coord_flip() +
+  facet_grid( . ~ metric_name, scales = "free_x") +
+  theme_bw() +
+  labs(
+    title = "South Dakota Performance metrics on all models",
+    x = "Performance",
+    y = "Model Names"
+  ) +
+  
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"))
+
+### points represent each of the 10 folds, repeated 3 times -> 30 points
+```
+
+
+
+Linear Model 6 is the best:
+
+
