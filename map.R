@@ -3,7 +3,11 @@ library(janitor)
 library(tidyverse)
 library(viridis)
 
-theme_set(theme_minimal())
+theme_set(theme_bw() + theme(panel.border = element_blank(),
+                             panel.grid.major = element_blank(),
+                             panel.grid.minor = element_blank(),
+                             axis.line = element_line(colour = "black"),
+                             text = element_text(family = "Times New Roman")))
 
 # LOAD AND CLEAN DATA --------------------------------
 df <- read_csv("analyticdata2024 - clean_data (1).csv")
@@ -49,7 +53,12 @@ joined_counties_continental |>
   scale_fill_gradientn(colors = colors, na.value = "grey90", n.breaks = num_breaks) +
   theme_minimal() +
   labs(title = "Choropleth Map of Poor Mental Health Days", fill = "Poor Mental Health Days") +
-  theme(legend.position = "right")
+  theme(legend.position = "right",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"),
+        text = element_text(family = "Times New Roman"))
 
 # Plot States -----------------------------------------------
 
@@ -61,7 +70,12 @@ joined_counties_continental |>
   scale_fill_gradientn(colors = colors, na.value = "grey90", n.breaks = num_breaks) +
   theme_minimal() +
   labs(title = "Choropleth Map of Poor Mental Health Days", fill = "Poor Mental Health Days") +
-  theme(legend.position = "right")
+  theme(legend.position = "right") +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"),
+        text = element_text(family = "Times New Roman"))
 
 # Arkansas
 joined_counties_continental |> 
@@ -70,17 +84,37 @@ joined_counties_continental |>
   geom_sf(color = "black", lwd = 0.1) +
   scale_fill_gradientn(colors = colors, na.value = "grey90", n.breaks = num_breaks) +
   theme_minimal() +
-  labs(title = "Choropleth Map of Poor Mental Health Days", fill = "Poor Mental Health Days") +
-  theme(legend.position = "right")
+  labs(title = "Poor Mental Health Days in Arkansas", fill = "Poor Mental Health Days") +
+  theme(legend.position = "right") +
+  theme(axis.text=element_text(size=20),
+        plot.title = element_text(size=30, face = "bold", hjust = 0.5),
+        legend.text = element_text(size=20),
+        legend.title = element_text(size=20),
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(3, "cm")) +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"),
+        text = element_text(family = "Times New Roman"))
 
-# California
+# SD
 joined_counties_continental |> 
-  filter(statefp == "6") |> 
+  filter(statefp == "46") |> 
   ggplot(aes(fill = poor_mental_health_days)) +
   geom_sf(color = "black", lwd = 0.1) +
   scale_fill_gradientn(colors = colors, na.value = "grey90", n.breaks = num_breaks) +
   theme_minimal() +
-  labs(title = "Choropleth Map of Poor Mental Health Days", fill = "Poor Mental Health Days") +
-  theme(legend.position = "right")
-
-
+  labs(title = "Poor Mental Health Days in South Dakota", fill = "Poor Mental Health Days") +
+  theme(legend.position = "right") +
+  theme(axis.text=element_text(size=20),
+        plot.title = element_text(size=30, face = "bold", hjust = 0.5),
+        legend.text = element_text(size=20),
+        legend.title = element_text(size=20),
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(3, "cm")) +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"),
+        text = element_text(family = "Times New Roman"))
