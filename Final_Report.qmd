@@ -1,0 +1,1017 @@
+---
+title: "The Impact of Mental Health Professional Density on Poor Mental Health"
+author:
+  - Lay Len Ching
+  - Nikhil Roy
+  - Urvi Chaubal
+date: "July 26, 2024"
+toc: true
+format:
+  html:
+    theme: cosmo
+    html-math-method: katex
+    self-contained: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+```{r, warning = F, message = F, echo = F, error = F}
+library(tidyverse)
+library(reshape)
+library(ggcorrplot)
+library(patchwork)
+library(viridis)
+library(sf)
+library(janitor)
+library(caret)
+
+theme_set(theme_bw() + theme(panel.border = element_blank(),
+                             panel.grid.major = element_blank(),
+                             panel.grid.minor = element_blank(),
+                             axis.line = element_line(colour = "black"),
+                             text = element_text(family = "Times New Roman")))
+
+# LOAD AND CLEAN DATA --------------------------------
+df <- read_csv("analyticdata2024 - clean_data (1).csv")
+df <- df |> 
+  janitor::clean_names()
+
+df <- df[grepl(" County", df$name), ] # take out states, keep only counties
+
+names(df) <- gsub("_raw_value$", "", names(df)) # take out "_raw_value"
+
+df <- df |> 
+  drop_na(poor_mental_health_days)
+
+# MAP DATA -----------------
+counties <- st_read("continental_us_counties_2022.geojson", quiet = T)
+counties <- clean_names(counties) # load geojson
+
+# filter data to include only continental us
+continental_us_fips <- c("01", "04", "05", "06", "08", "09", "10", "11", "12", "13", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48", "49", "50", "51", "53", "54", "55", "56") #fips code for all continental states
+
+counties_continental <- counties[counties$statefp %in% continental_us_fips, ]
+
+# fixing fips code format
+counties_continental$statefp <- as.numeric(counties_continental$statefp) 
+counties_continental$x5_digit_fips_code <- paste0(counties_continental$statefp, counties_continental$countyfp)
+
+counties_continental$x5_digit_fips_code <- as.numeric(counties_continental$x5_digit_fips_code)
+
+df$x5_digit_fips_code <- as.numeric(df$x5_digit_fips_code)
+
+# join data frames
+joined_counties_continental <- left_join(counties_continental, df, by = "x5_digit_fips_code")
+
+joined_counties_continental <- st_simplify(joined_counties_continental, preserveTopology = TRUE, dTolerance = 0.01) #make geometry simpler
+
+```
+## Introductions
+Mental health providers are an important part of the population’s access to mental health care. According to a study from the Kaiser Family Foundation and CNN, 90% of the public believe there is a current mental health crisis; with almost one third of participants stating that they could not acquire mental health services and 60% of psychologists unable to see new patients. The inability to see professionals may lead to further mental health issues that negatively progress overtime. 
+
+As a critical component to overall health, prolonged poor mental health raises risks for physical health issues. As chronic health conditions persist, mental illnesses continue or worsen. By studying the relationship of mental health professionals in a county and the average poor mental health days, we can uncover underlying relationships and additional factors that contribute to the number of poor mental health in a county.
+
+## Data
+### Data Source
+We used the County Health Rankings 2024 dataset to conduct our analysis and base our research. The organization is part of a program from the University of Wisconsin Population Health Institute which focuses on improving personal and community health. The original dataset includes specific variables on health outcomes, health behaviors, clinical care, social and economic factors, and physical environment for each United States county. From the original dataset, we select variables related to mental and physical health. We specifically choose such variables due to their relevance to individuals’ lifestyle and the changes they can make to improve their mental health.  
+
+### Main Variables
+The two main variables we are using are a **ratio of population to mental health providers** and **poor mental health days**. The ratio variable uses the county population and total mental health providers in that county based on the National Provider Identification file. The identification file classifies family therapists, marriage therapists, alcohol and drug abuse therapists, psychiatrists, psychologists, clinical social workers, counselors, and mental health specialized nurses as mental health providers. The poor mental health days variable is an age-adjusted, 30 day average of poor mental health days. By using an age-adjusted variable, counties with varying age groups can be fairly compared with one another. This is especially important for those with higher proportions of specific age groups. For example, according to the World Health Organization, older adults are more susceptible to poor mental health conditions such as depression and anxiety due to living conditions (isolation, nursing home care) and poor physical health (chronic illnesses, neurological conditions). Therefore, counties with higher elderly adult populations may have a higher rate of poor mental health days than others, which can ultimately skew an average value. Hence, an age-adjusted variable standardizes the value and maintains comparability between counties with different age groups.
+
+### Supplemental Variables
+In addition to the main predictor and response variables, we examine other variables health and lifestyle variables. One variable of importance is **Frequent Mental Distress**, an age-adjusted variable which refers to a percentage of adults that report 14 or more poor mental health days in the past 30 days. Other variables such as excessive drinking, food insecurity, adult obesity, and physical inactivity are all age-adjusted percentages of the adult population in the county. 
+
+### EDA
+To begin exploring the response and predictor variables, we create a histogram to model poor mental health days in the United States. In modeling our response variable, its normal distribution becomes evident, appearing symmetrical and unimodal. This assumption is further confirmed when we look at the median and mean, with values of 5.222 and 5.201 respectively. 
+
+```{r}
+# first, visualize the response variable
+df |> 
+  ggplot(aes(x=poor_mental_health_days, y= after_stat(density))) + 
+  geom_histogram(fill="#94111f", color = "#c51230", bins = 23) +
+  geom_density(color = "black", lwd = 1, linetype = "dashed") +
+  labs(x= "Mental Health Days",
+       y = "Count",
+       title = "Response Variable Appears Normally Distributed") + 
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+        axis.title = element_text(size=30),
+        axis.title.x = element_text(size=18, margin = margin(t = 25, r = 0, b = 10, l = 0)),
+        axis.title.y = element_text(size=18, margin = margin(t = 0, r = 25, b = 0, l = 10)),
+        axis.text = element_text(size = 15))
+```
+Furthermore, we build a choropleth map of **Poor Mental Health Days**, allowing us to visualize trends across the United States. 
+
+```{r}
+#PLOT MAP ----------------------------------------------------
+num_breaks <- 10  # adjust num breaks
+
+# colors using viridis
+colors <- rev(viridis_pal(option = "plasma")(num_breaks))
+
+#  map 
+joined_counties_continental |> 
+  ggplot(aes(fill = poor_mental_health_days)) +
+  geom_sf(color = "black", lwd = 0.1) +
+  scale_fill_gradientn(colors = colors, na.value = "grey90", n.breaks = num_breaks) +
+  theme_minimal() +
+  labs(title = "Choropleth Map of Poor Mental Health Days", fill = "Poor Mental Health Days") +
+  theme(legend.position = "right",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_text(size=16, margin = margin(t = 25, r = 0, b = 10, l = 0)),
+        axis.title.y = element_text(size=16, margin = margin(t = 0, r = 25, b = 0, l = 10)),
+        plot.title = element_text(size = 16, face = "bold", hjust = 0.8),
+        axis.text = element_blank(),
+        text = element_text(family = "Times New Roman"))
+
+
+```
+Looking at this map, we can discern two specific trends. First, the north of the US appears to have the lowest Poor Mental Health numbers, particularly the states of North Dakota and South Dakota. Second, we see very high numbers of Poor Mental Health days across Southern states, such as Arkansas, Kentucky, and Tennessee. We hone in on two states: Arkansas and South Dakota. Discussions on motivation behind these choices is further touched upon in the results section. 
+
+The graphs below focus on average Poor Mental Health days in Arkansas and South Dakota respectively by county.
+
+```{r}
+# Arkansas
+joined_counties_continental |> 
+  filter(statefp == "5") |> 
+  ggplot(aes(fill = poor_mental_health_days)) +
+  geom_sf(color = "black", lwd = 0.1) +
+  scale_fill_gradientn(colors = colors, na.value = "grey90", n.breaks = num_breaks) +
+  theme_minimal() +
+  labs(title = "Poor Mental Health Days in Arkansas", fill = "Poor Mental Health Days") +
+  theme(legend.position = "right") +
+  theme(
+        plot.title = element_text(size=15, face = "bold", hjust = 0.5),
+        legend.title = element_text(size=10),
+        axis.text = element_blank()) +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(family = "Times New Roman"))
+```
+
+```{r}
+# SD
+joined_counties_continental |> 
+  filter(statefp == "46") |> 
+  ggplot(aes(fill = poor_mental_health_days)) +
+  geom_sf(color = "black", lwd = 0.1) +
+  scale_fill_gradientn(colors = colors, na.value = "grey90", n.breaks = num_breaks) +
+  theme_minimal() +
+  labs(title = "Poor Mental Health Days in South Dakota", fill = "Poor Mental Health Days") +
+  theme(legend.position = "right") +
+  theme(
+        plot.title = element_text(size=15, face = "bold", hjust = 0.5),
+        legend.title = element_text(size=10),
+        axis.text = element_blank()) +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(family = "Times New Roman"))
+```
+
+## Methods
+### Variable Selection
+To begin our exploration of the potential variables we could employ when building our model, we begin with an analysis of the two main variables from our research question, (1) Ratio of Population to Mental Health Professionals and (2) Poor Mental Health Days. By plotting these two against each other, we create a scatter plot that allows us to visually interpret their relationship. 
+
+```{r, warning=F}
+df |> 
+  ggplot(aes(x=poor_mental_health_days,
+             y=ratio_of_population_to_mental_health_providers)) + 
+  geom_point(color = "#94111f", alpha=0.45) +
+  labs(title = "No Correlation Between Variables", subtitle = "Poor Mental Health Days vs Ratio of Population to Mental Health Providers", x= "Poor Mental Health Days", y= "Ratio of Population to Mental Health Providers") +
+  theme(plot.title = element_text(size = 15, face="bold", hjust = 0.5),
+        plot.subtitle = element_text(size=10, face = "italic", hjust = 0.5),
+        axis.text = element_text(size=8),
+        axis.title.x = element_text(size=10, margin = margin(t=15)),
+        axis.title.y = element_text(size=10, margin = margin(r=15)))
+```
+Looking at this graph, we can clearly see that there appears to be no relationship between our two main variables, whether linear or otherwise. Points appear randomly scattered throughout the plot, following no direction and providing us no insight into our response variable, Poor Mental Health Days. Our first conclusion is formulated here: the number of mental health professionals in a county does not predict the number of poor mental health days an individual within that same county will experience. 
+
+Now that we understand Ratio of Population to Mental Health Professionals (referred to as "Ratio" for the rest of the report) does not have a role in predicting Poor Mental Health Days, we aim to uncover the variables that are correlated and can be used in predicting our response variable. To reiterate, our focus is on factors that affect health and pertain to individuals’ lifestyles, including but not limited to: smoking, drinking, and exercise. We selected 22 variables fitting this criteria for our initial analysis. 
+
+For this analysis, we employ a correlation matrix of all 22 variables. We further refine our criteria by selecting variables that have a correlation greater than |0.30| and are left with eight key variables that are pertinent to the direction of our research and are highly correlated with our response variable. A correlation matrix for these eight variables is created to further visualize relationships. 
+
+```{r}
+# Correlation ------------------------------------------------------------------
+possible_predictors <- df |> 
+  select(frequent_mental_distress, food_insecurity, adult_smoking , physical_inactivity , adult_obesity , excessive_drinking , high_school_completion , broadband_access , poor_mental_health_days , ratio_of_population_to_mental_health_providers)
+
+full_cor <- possible_predictors |>
+  drop_na() |> 
+  cor() |> 
+  ggcorrplot(type = "lower") + 
+  scale_x_discrete(labels = c("poor_mental_health_days" = "Poor Mental Health Days",
+                              "broadband_access" = "Broadband Access",
+                              "high_school_completion" = "High School Completion",
+                              "excessive_drinking" = "Excessive Drinking",
+                              "adult_obesity" = "Adult Obesity",
+                              "physical_inactivity" = "Physical Inactivity",
+                              "adult_smoking" = "Adult Smoking",
+                              "food_insecurity" = "Food Insecurity",
+                              "frequent_mental_distress" = "Frequent Mental Distress",
+                              "ratio_of_population_to_mental_health_providers" = "Ratio")) + 
+  scale_y_discrete(labels = c("poor_mental_health_days" = "Poor Mental Health Days",
+                              "broadband_access" = "Broadband Access",
+                              "high_school_completion" = "High School Completion",
+                              "excessive_drinking" = "Excessive Drinking",
+                              "adult_obesity" = "Adult Obesity",
+                              "physical_inactivity" = "Physical Inactivity",
+                              "adult_smoking" = "Adult Smoking",
+                              "food_insecurity" = "Food Insecurity",
+                              "frequent_mental_distress" = "Frequent Mental Distress")) +
+  theme(
+        legend.title = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"),
+        text = element_text(family = "Times New Roman"))
+
+
+cor_matrix <- cor(possible_predictors)
+cor_matrix_vertical <- t(cor_matrix["poor_mental_health_days", ])
+response_cor <- ggcorrplot(cor_matrix_vertical) +
+  theme(axis.text.x = element_blank(),
+        legend.title = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"),
+        text = element_text(family = "Times New Roman")) +
+  scale_y_discrete(labels = c("poor_mental_health_days" = "Poor Mental Health Days",
+                              "broadband_access" = "Broadband Access",
+                              "high_school_completion" = "High School Completion",
+                              "excessive_drinking" = "Excessive Drinking",
+                              "adult_obesity" = "Adult Obesity",
+                              "physical_inactivity" = "Physical Inactivity",
+                              "adult_smoking" = "Adult Smoking",
+                              "food_insecurity" = "Food Insecurity",
+                              "frequent_mental_distress" = "Frequent Mental Distress"))
+
+full_cor + response_cor & labs(title = "High Correlation Amongst Possible Predictors") & theme(plot.title = element_text(hjust = -0.5, face = "bold", size = 10))
+```
+On the left side of the plot, we can see a correlation matrix of these eight variables, plus our original potential predictor, Ratio, and our response, Poor Mental Health Days. On the right side of the plot, we hone in specifically on our response and visualize its relationship with each of the eight key variables. Interestingly, the variables high school completion and excessive drinking  appear negatively correlated with our response. We can develop a compelling narrative to explain these negative correlations. First, those who complete high school are more likely to have better mental health outcomes. A study by Kondirolli & Sunder finds that “an extra year of education led to a lower likelihood of reporting any symptoms related to depression and anxiety”, (Kondirolli & Sunder, 2022). Second, while excessive drinking being negatively correlated could appear counterintuitive, we can understand that for some, drinking becomes not only a vice, but a relief from the stresses of everyday life. According to the National Institute on Alcohol Abuse, heavy drinking is defined as having more than 8 drinks per week for women and more than 15 drinks per week for men (Litten et al., 2024). While this might seem like a large amount, it simply amounts to two or three nights of heavy drinking per week. Those who drink “excessively”  might be experiencing poor mental health in their day-to-day life, which, for them, is relieved by getting a drink after work with their friends or going to the bar on the weekends.
+
+### Linear Model Building
+From this correlation matrix, we can see that Frequent Mental Distress is the variable which is most highly correlated with our response. Thus, we begin by building a model that uses Frequent Mental Distress as the only predictor to the response. We continue adding more predictors that also seem to be correlated with our response and analyze which variables contribute to the model best through performance metrics, namely adjusted R-squared, Akaike Information Criterion (AIC), and Bayesian Information Criterion (BIC). While building these models, it is imperative that we consider the possibility of multicollinearity between variables. Looking back at our correlation matrix, we make sure to test models which omit predictor variables that appear highly correlated. To test multicollinearity in our models, we use a Variance Inflation Factor (VIF), removing any variables with a VIF > 5.
+
+Additionally, we perform stepwise and backward selection in order to see if statistical algorithms can more accurately select predictors that are more ideal for our response. For stepwise selection, we give the algorithm a model that has Frequent Mental Distress predicting Poor Mental Health Days. While the algorithm is thorough in its search for predictors, it takes larger amounts of computing power and increases complexity in our model building. Similarly, backwards selection, while different from stepwise selection, produces similar results regarding practicality and efficiency. Thus, in holistically re-analyzing our EDA and background research, we select 9 models and test them against each other to find the most practical regression to model Poor Mental Health Days.  
+After comparing the 9 models we built using various statistical metrics (AIC, BIC, RMSE), we focus towards two models that appeared best in predicting Poor Mental Health Days: models 6 and 7. Model 6 includes 4 predictors (Frequent Mental Distress, Adult Smoking, Physical Inactivity, and Adult Obesity) while Model 7 includes all predictors in model 6 plus an additional 4: Excessive Drinking, Broadband Access, Asian ethnicity percentage, and Social Associations. A key note about the main difference between models 6 and 7 is not the predictors themselves, but the fact that model 7 has double the amount of predictors, making it double as complex. 
+
+To further understand our two chosen models, we highlight our same statistical metrics with the addition of Degrees of Freedom (df) and Adjusted R-Squared. In this regard, df relates to the number of predictors in a model, meaning Model 6 has half the degrees of freedom—or half the complexity—as Model 7 . Model 7 has a higher adjusted R-squared, but when we look more closely at the exact number, the difference is only 0.005, which is negligible when considering our scale. Likewise, the AIC and BIC performance metrics are not statistically significant enough to be different from Model 7, confirming our choice of Model 6 since we are looking for the simplest possible model withou sarificing performance evaluations.
+
+Model 6 has four predictors:
+Frequent Mental Distress
+Adult Smoking
+Excessive Drinking
+Adult Obesity.
+
+Visualizing our four predictor variables, we can sustain assumptions of linearity through scatterplots. 
+
+```{r, echo = F, warning = F, message = F}
+lm_predictors <- df |>  # first, select predictors
+  select(frequent_mental_distress,
+         adult_smoking,
+         physical_inactivity,
+         adult_obesity,
+         ratio_of_population_to_mental_health_providers,
+         poor_mental_health_days)
+
+mental_distress <- lm_predictors |> 
+  ggplot(aes(x=frequent_mental_distress,
+             y=poor_mental_health_days)) +
+  geom_point(alpha=0.38, color = "#94111f") + 
+  geom_smooth(method="lm") +
+  labs(x="Frequent Mental Distress", y="Poor Mental Health Days")
+
+smoking <- lm_predictors |> 
+  ggplot(aes(x=adult_smoking,
+             y=poor_mental_health_days)) +
+  geom_point(alpha=0.38, color = "#94111f") + 
+  geom_smooth(method="lm") +
+  labs(x="Adult Smoking", y="Poor Mental Health Days")
+
+
+inactivity <- lm_predictors |> 
+  ggplot(aes(x=physical_inactivity,
+             y=poor_mental_health_days)) +
+  geom_point(alpha=0.38, color = "#94111f") + 
+  geom_smooth(method="lm") +
+  labs(x="Physical Inactivity", y="Poor Mental Health Days")
+
+obesity <- lm_predictors |> 
+  ggplot(aes(x=adult_obesity,
+             y=poor_mental_health_days)) +
+  geom_point(alpha=0.38, color = "#94111f") + 
+  geom_smooth(method="lm") +
+  labs(x="Adult Obesity", y="Poor Mental Health Days")
+
+
+mental_distress + smoking + inactivity + obesity +
+  plot_annotation(title = "Linear Relationship between Response and Predictor Variables") &
+  theme(plot.title = element_text(face = "bold", hjust = 0.5))
+
+```
+
+## Results
+As described earlier, Model 6 was our best-fit model for assess Poor Mental Health Days in the United States. To further test this model, we can make predictions using test-train splitting. We split the data randomly 80-20, with 80% as the “training” set and 20% as our “test” set. Then, we employ 10-fold cross-validation and repeated the bootstrap 3 times. In short, this method randomly selects data with replacements to ensure there is no bias. Finally, we use a prediction function which learns the best model parameters for each variable using the training data and creates predictions. 
+
+### State Selection & Testing
+To further test the accuracy of our model 6, weighted against the models, we hone in on two states: Arkansas and South Dakota. The reason for this selection was the noticeable difference in the response spread across each state, respectively. Reflecting back on the US Choropleth map of Poor Mental Health Days, we can recall our two trends: (1) lowest Poor Mental Health Day averages in the North, and (2) highest poor mental health averages in the South. Regarding trend one, we choose the state of South Dakota because it had the largest sample size of the Northern states with the lowest averages of Poor Mental Health Days. For trend two, we choose the state of Arkansas due to it having a relatively large sample size and being the state with the highest number of Poor Mental Health Days. We will use Arkansas and South Dakota data to conduct a state-specific analysis of the individual lifestyle related factors that contribute to poor mental health.
+
+After our selection, we tested Model 6 for each state. After repeating our model performance and evaluation functions across several models, Model 6 still stood out as the most practical model. However, coefficients for the specific data that contained the entire United States, differed from the coefficient estimates for the specific states of South Dakota and Arkansas. Various predictors, such as adult smoking, exhibited negative coefficients, which might appear counter-intutive. However, we can paint a picture of why this is so. While smoking is a habit that could be said to contribute to poor mental health, it is important to understand that for some, it appears in their life as a vice and therefore a reliever from the stresses of everyday life. Additionally, it is important to note our small sample sizes. It is hard to obtain statistically significant results with such small sample sizes. This is further discussed below in our limitations. 
+
+Here are the coefficients for South Dakota using model 6: 
+
+```{r, warning = F, message = F, echo = F, error = F, include = F}
+ 
+mental <- read.csv("analyticdata2024 - clean_data (1).csv", header = TRUE)
+
+### Clean data columns
+mental %>% clean_names()
+
+s_dakota <- mental %>% filter(State.Abbreviation == "SD" & !Name == "South Dakota")  # change variable name
+
+set.seed(2811)
+train <- s_dakota |> 
+  slice_sample(prop = 0.8)
+test <- s_dakota |> 
+  anti_join(train)
+
+my_ctrl <- trainControl(method = 'repeatedcv', number = 5)
+metric_acc <- "RMSE"
+
+scaler <- train %>% select(where(is.numeric), -Poor.Mental.Health.Days.raw.value) |> scale()
+train <- train |> select(Poor.Mental.Health.Days.raw.value) |> bind_cols(scaler)
+
+mod6 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
+
+             
+             , data = train)
+
+mod_6_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                     data = train,
+                     method = 'lm',
+                     preProcess = c("center", "scale"),
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+
+
+mod_7_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                     data = train,
+                     method = 'lm',
+                     preProcess = c("center", "scale"),
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+```
+
+```{r}
+#summary(mod6)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+tab_model(mod6)
+```
+
+
+Likewise, here are the coefficient for Arkansas using model 6:
+```{r, warning = F, message = F, echo = F, error = F, include = F}
+
+mental <- read.csv("analyticdata2024 - clean_data (1).csv", header = TRUE)
+
+### Clean data columns
+mental %>% clean_names()
+
+arkansas <- mental %>% filter(State.Abbreviation == "AR" & !Name == "Arkansas") 
+
+set.seed(2811)
+train <- arkansas |> 
+  slice_sample(prop = 0.8)
+test <- arkansas |> 
+  anti_join(train)
+
+my_ctrl <- trainControl(method = 'repeatedcv', number = 5)
+metric_acc <- "RMSE"
+
+scaler <- train %>% select(where(is.numeric), -Poor.Mental.Health.Days.raw.value) |> scale()
+train <- train |> select(Poor.Mental.Health.Days.raw.value) |> bind_cols(scaler)
+
+mod6 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
+
+             
+             , data = train)
+
+mod_6_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                     data = train,
+                     method = 'lm',
+                     preProcess = c("center", "scale"),
+                     metric = metric_acc,
+                     trControl = my_ctrl)
+
+
+mod_7_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                     data = train,
+                     method = 'lm',
+                     preProcess = c("center", "scale"),
+                     metric = metric_acc,
+                    trControl = my_ctrl)
+```
+
+```{r}
+#summary(mod6)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+tab_model(mod6)
+```
+
+As you can see, both models have Frequent Mental Distress as the most significant predictor for the response. Since the estimated value is positive, we can say that for every increase in 1 unit in Frequent Mental Distress, we see an increase in Poor Mental Health Days by 0.80/0.37 days for South Dakota/Arkansas, respectively. On the contrary, Adult Obesity is negative for both states, so we would see a decrease in Poor Mental Health Days for every increase in 1 unit of Adult Obesity. This was surprising because as there are more Adult Obesity, it decreases the amount of poor mental health days. One important difference to note is that Physical Inactivity is roughly 3 times more statistically significant/impactful on the response for the state of Arkansas than it is for South Dakota. Thus, this exemplifies that each state in the US are different in terms of society, environment, people, population, etc. Therefore, we cannot use model 6 to say that it has the best predictors for every individual state, but rather we use model 6 generally if we want to map the entire United States and stick with 1 model to go more in-depth within a state itself. 
+
+## Discussion
+### Conclusion: Answer to Research Question
+Our question of interest was the following: Do the Number of Mental Health Professionals per County Affect the Number of Poor Mental Health days? Our first conclusion answers this question directly. The number of mental health professionals does not affect the number of poor mental health days. This can be further backed by a lack of a relationship between the Ratio of Mental Health Providers to Population and Poor Mental Health Days. 
+
+### Conclusion: Predictor Variables
+Our second conclusion focuses on the variables that do predict Poor Mental Health Days. Through an extensive analysis of both linear and non-linear regression models, we can safely state that the predictors that work best to approximate our response variable are: 
+
+Frequent Mental Distress  
+Adult Smoking
+Physical Inactivity
+Adult Obesity
+
+Our conclusion is further supported by our state-wise analysis, where we hone in on South Dakota and Arkansas to confirm that these variables continue to be the best predictors of poor mental health days. 
+
+### Limitations
+The first limitation we encountered is that we cannot compare across states due to differing data collection methods, which limits our ability to draw consistent and reliable conclusions about mental health trends on a state-by-state basis. Inconsistencies in survey techniques, population coverage, and reporting standards introduce biases and errors, making it challenging to directly compare results from different states. As a result, our ability to identify and analyze state-specific factors influencing mental health outcomes is compromised. To address this, we built a model using entire US data as opposed to state or county data for a more uniform approach. However, this broader model may overlook important local variations, further highlighting the need for standardized data collection practices across states to enhance the accuracy and applicability of our findings.
+
+Our second limitation arises when comparing US data and specific State data. When using aggregate US data, variables appear statistically significant when we consider an alpha of 0.05. However, not all of these variables confirm statistical significance when we apply our models directly during our state-wise analysis. While this is an important fact to consider when analyzing our model, we believe that these variables show beyond doubt relevance in terms of practical significance. 
+
+It is also important to consider the differences between states when analyzing factors affecting poor mental health. Factors such as the state’s environment, regulatory policies, healthcare infrastructure, and socioeconomic conditions can significantly influence mental health outcomes. These variables can create disparities and unique challenges that affect the generalizability and performance of statistical models. For instance, states with robust public health initiatives and better access to mental health services may experience lower rates of poor mental health days, despite the fact that these do not directly affect any of our predictor variables. Additionally, cultural norms and attitudes towards mental health play a crucial role, affecting the willingness of individuals to seek help and adhere to treatment. Another critical factor is geography and the environment. Urbanization, pollution levels, and climate can also impact mental health differently across states. The statistical significance observed on a national scale may not hold in states like South Dakota and Arkansas due to these varying local conditions and influence. In South Dakota, factors such as rural settings, limited healthcare access, and cultural attitudes towards mental health may contribute to different mental health outcomes compared to other states. Similarly, in Arkansas, socioeconomic challenges, healthcare infrastructure limitations, and specific state policies may affect the prevalence and management of mental health issues.
+
+Furthermore, the issue of a small sample size can undermine the reliability of our findings. As the number of counties per state provides limited data points for which we can fit our model, the estimates of population parameters become less precise, leading to an increase of the likelihood of a Type II error. Therefore, while our statistical model shows significance on a national level, it is crucial to acknowledge state-specific variations, as well as other limitations, and consider them in our analysis. In understanding the unique context of each state, we can capture a more accurate and comprehensive picture of the factors influencing poor mental health across the United States.
+
+### Future Research
+For future research, it is crucial to explore potential avenues to address the limitations identified in our current study. One such direction is to shift from county-level data to individual-level data. By doing so, we can increase our sample size significantly, thereby enhancing the precision of our estimates and reducing the likelihood of Type II errors. Individual-level data would also allow us to control for a wider range of variables, providing a more nuanced understanding of the factors influencing mental health outcomes.
+
+Another important area of research is the standardization of data collection practices across states. Developing and implementing uniform survey techniques and reporting standards will reduce the prevalence of biases and errors, which will enable us to more accurately perform state-by-state comparisons. In standardizing data collection methods, we can identify and analyze state-specific factors influencing mental health outcomes, which will lead us to more concrete conclusions as well as more effective interventions. 
+
+Additionally, future studies should consider the impact of state-specific variables more comprehensively. Investigating the influence of environmental factors, regulatory policies, and socioeconomic conditions at the state level can provide deeper insights into the disparities observed in mental health outcomes.
+
+By pursuing these research directions, we can develop a more comprehensive and accurate understanding of mental health trends across the United States, which would allow us to provide better recommendations on how individuals can improve their mental health—ultimately, the aim of our study.
+
+## Appendix
+
+### Comparison of 9 Linear Models
+```{r, warning = F, message = F, echo = F, error = F, include = F}
+# Nine Models
+library(tidyverse)
+library(janitor)
+library(dplyr)
+library(reshape2)
+
+csv <- "Final_Report_Copy.csv"
+mental <- read.csv(csv, header = TRUE)
+
+### Clean data columns
+mental %>% clean_names()
+
+
+### Overview of data as a whole
+mental %>% glimpse()
+
+mental_filtered <- mental %>% select(where(is.numeric))
+
+correlations <- cor(mental_filtered) 
+
+correlations <- melt(correlations, na.rm = TRUE)
+
+cor_feature <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter( (value > 0.70 & value < 1) | value < -0.70)
+
+cor_response <- correlations %>% distinct(value, .keep_all = TRUE) %>% filter(Var2 == "Poor.Mental.Health.Days.raw.value")
+
+# Model 1
+mod1 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+             (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value * Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value * Frequent.Mental.Distress.raw.value) + (Population.raw.value * Food.Insecurity.numerator)
+             
+             , data = mental)
+
+mod1 %>% broom::glance()
+
+# Model 2
+mod2 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+             (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value) + (Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value) + Frequent.Mental.Distress.raw.value + (Population.raw.value * Food.Insecurity.numerator)
+             
+             , data = mental)
+
+broom::glance(mod2)
+
+# Model 3
+mod3 <- lm(Poor.Mental.Health.Days.raw.value ~ Ratio.of.population.to.mental.health.providers. + Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
+             
+             , data = mental)
+
+summary(mod3)
+
+# Model 4
+mod4 <- lm(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+             (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value) + (Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value) + Frequent.Mental.Distress.raw.value
+             
+             , data = mental)
+
+broom::glance(mod4)
+
+# Model 5
+mod5 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Food.Insecurity.raw.value
+             
+             , data = mental)
+
+mod5 %>% broom::glance()
+
+# Model 6
+mod6 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
+
+             
+             , data = mental)
+
+mod6 %>% broom::glance()
+
+# Model 7
+mod7 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value
+
+
+
+             
+             , data = mental)
+
+mod7 %>% broom::glance()
+
+# Model 8
+mod8 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value + Poor.Physical.Health.Days.raw.value + Poor.or.Fair.Health.raw.value
+
+             , data = mental)
+
+mod8 %>% broom::glance()
+
+# Model 9
+mod9 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value + Poor.Physical.Health.Days.raw.value + Poor.or.Fair.Health.raw.value + Ratio.of.population.to.mental.health.providers.
+
+             , data = mental)
+
+mod9 %>% broom::glance()
+
+# Function for metrics
+extract_metrics <- function(mod, mod_name)
+{
+  broom::glance(mod) %>% mutate(mod_name = mod_name)
+}
+
+
+all_metrics <- purrr::map2_dfr(list(mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8, mod9),
+                               as.character(1:9),
+                               extract_metrics)
+
+all_metrics %>% glimpse()
+
+all_metrics <- purrr::map2_dfr(list(mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8, mod9),
+                               as.character(1:9),
+                               extract_metrics)
+```
+
+```{r}
+all_metrics %>% 
+  select(mod_name,  df, adj.r.squared, AIC, BIC) %>% 
+  pivot_longer(!c("mod_name")) %>%  # try renaming variables
+  ggplot(mapping = aes(x = mod_name, y = value)) +
+  geom_point(size = 3) +
+  facet_wrap(~name, scales = "free_y") +
+  theme_bw() +
+  labs(
+    title = "Model Performance Evaluation On US Data",
+    x = "Models (1-9)",
+    y = "Performance",
+    
+  ) +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"),
+        strip.text = element_text(size = 16))
+
+```
+
+### Comparison of Top 3 Linear Models
+```{r}
+all_metrics <- purrr::map2_dfr(list(mod6, mod7, mod8),
+                               as.character(6:8),
+                               extract_metrics)
+all_metrics %>% 
+  select(mod_name, df, adj.r.squared, AIC, BIC) |> 
+  pivot_longer(!c("mod_name")) %>% 
+  ggplot(mapping = aes(x = mod_name, y = value)) +
+  geom_point(size = 3) +
+  facet_wrap(~name, scales = "free_y") +
+  theme_bw() +
+  labs(
+    title = "Model Performance Evaluation On US Data",
+    x = "Models 6,7,8",
+    y = "Performance"
+  ) +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"),
+         strip.text = element_text(size = 16))
+
+```
+
+### Assure Model Does Not Overfit
+```{r, warning = F, message = F, echo = F, error = F, include = F}
+library(caret)
+
+set.seed(3231)
+
+n_folds <- 5
+mental_folds <- mental |>
+  mutate(fold_id = sample(rep(1:n_folds, length.out = n())))
+
+
+mental <- mental |> 
+  left_join(mental_folds)
+
+mental |> count(fold_id)
+
+
+# Split the data into 80% training and 20% test set
+
+set.seed(3239)
+trainIndex <- createDataPartition(mental$Poor.Mental.Health.Days.raw.value, p = 0.8, list = FALSE)
+trainData <- mental[trainIndex, ]
+testData <- mental[-trainIndex, ]
+
+# Train the model on the training data with 5-fold cross-validation and hyperparameter tuning
+train_control <- trainControl(method = "cv", number = 5)
+
+# Define the grid of hyperparameters for tuning
+tune_grid <- expand.grid(alpha = 1,  # Lasso regression
+                         lambda = seq(0.001, 0.1, by = 0.001))
+
+mental <- mental |> 
+  na.omit()
+
+cv_mod_6 <- train(Poor.Mental.Health.Days.raw.value ~ Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value, 
+                  data = trainData, 
+                  method = "glmnet", 
+                  trControl = train_control, 
+                  tuneGrid = tune_grid)
+
+# Make predictions on the training and test data
+train_predictions <- predict(cv_mod_6, newdata = trainData)
+test_predictions <- predict(cv_mod_6, newdata = testData)
+
+# Evaluate the model on training data
+train_r_squared <- cor(trainData$Poor.Mental.Health.Days.raw.value, train_predictions)^2
+train_mae <- mean(abs(trainData$Poor.Mental.Health.Days.raw.value - train_predictions))
+
+# Evaluate the model on test data
+test_r_squared <- cor(testData$Poor.Mental.Health.Days.raw.value, test_predictions)^2
+test_mae <- mean(abs(testData$Poor.Mental.Health.Days.raw.value - test_predictions))
+
+cat("Train R-squared:", train_r_squared, "\n")
+cat("Train MAE:", train_mae, "\n")
+cat("Test R-squared:", test_r_squared, "\n")
+cat("Test MAE:", test_mae, "\n")
+```
+
+```{r}
+
+# Plot predictions vs actual values for training and test data
+ggplot() +
+  geom_point(aes(x = trainData$Poor.Mental.Health.Days.raw.value, y = train_predictions, color = "Train"), alpha = 0.75) +
+  geom_point(aes(x = testData$Poor.Mental.Health.Days.raw.value, y = test_predictions, color = "Test"), alpha = 0.75) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  ggtitle("Model 6 Actual vs Predicted Values For US Data Mental Health Days") +
+  xlab("Actual Values") +
+  ylab("Predicted Values") +
+  scale_color_manual(name = "Data", values = c("Train" = "blue", "Test" = "orange")) +
+  
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"))
+
+```
+The plot above thoroughly exemplifies the significance model 6 has on estimating Poor Mental Health Days across the United States. As visualized, the red line marks the exact prediction with the associated value with perfect accuracy. The blue and orange points are the predicted values the model produced based on learning from the training and test data. We can see the points are relatively close to the red line (which indicates accuracy) and have minimal distance (called the root mean squared error (RMSE)). Thus, minimizing the distance helps determine a good model and in this case, the distance is small . The difference in color between the points - blue and orange - is the test and training data. The main reason we did this is to ensure our model does not overfit. Overfitting is when the model does well on the testing data but performs poorly on the testing data. Since the blue and orange points are similar with each other, model 6 does not overfit - a good thing. Model 6 does a great job in predicting Poor Mental Health Days with the four predictors, explaining our model well and accurately. 
+
+
+### Comparing Models by State
+```{r, warning = F, message = F, echo = F, error = F}
+# South Dakota
+enet_default_6 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                        data = s_dakota,
+                        method = 'glmnet',
+                        preProcess = c("center", "scale"),
+                        tuneLength = 10,
+                        metric = metric_acc,
+                        trControl = my_ctrl)
+
+
+enet_default_7 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                        data = train,
+                        method = 'glmnet',
+                        preProcess = c("center", "scale"),
+                        tuneLength = 10,
+                        metric = metric_acc,
+                        trControl = my_ctrl)
+
+enet_default_complex <- train(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+                                (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value * Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value * Frequent.Mental.Distress.raw.value) + (Population.raw.value * Food.Insecurity.numerator),
+                              data = train,
+                              method = 'glmnet',
+                              preProcess = c("center", "scale"),
+                              tuneLength = 10,
+                              metric = metric_acc,
+                              trControl = my_ctrl)
+
+set.seed(3231)
+
+rf_mod_6 <- caret::train(
+  Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value ,
+  data = train,
+  method = 'rf',
+  metric = metric_acc,
+  trControl = my_ctrl,
+  importance = TRUE
+)
+
+set.seed(3231)
+
+rf_mod_7 <- caret::train(
+  Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+  data = train,
+  method = 'rf',
+  metric = metric_acc,
+  trControl = my_ctrl,
+  importance = TRUE
+)
+
+
+set.seed(12341)
+fit_gbm_mod_6 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                       data = train,
+                       method = "gbm",
+                       metric = metric_acc,
+                       trControl = my_ctrl,
+                       verbose=FALSE)
+
+set.seed(12341)
+fit_gbm_mod_7 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                       data = train,
+                       method = "gbm",
+                       metric = metric_acc,
+                       trControl = my_ctrl,
+                       verbose=FALSE)
+
+gbm_grid <- expand.grid(n.trees = c(10, 50, 100, 150, 200, 300, 400, 500),
+                        shrinkage = c(0.01, 0.05, 0.1),
+                        interaction.depth = fit_gbm_mod_6$bestTune$interaction.depth,
+                        n.minobsinnode = fit_gbm_mod_6$bestTune$n.minobsinnode)
+
+set.seed(12341)
+fit_gbm_tune <- train( Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                       data = train,
+                       method = "gbm",
+                       metric = metric_acc,
+                       tuneGrid = gbm_grid,
+                       trControl = my_ctrl,
+                       verbose=FALSE)
+
+set.seed(3819)  # for reproducibility
+gam_model <- train(
+  Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value, 
+  data = train,
+  method = "gam",               
+  preProcess = c("center", "scale"),  
+  trControl = my_ctrl
+)
+
+concrete_model_compare <- resamples(list(Elastic6 = enet_default_6,
+                                         Elastic7 = enet_default_7,
+                                         RF6 = rf_mod_6,
+                                         RF7 = rf_mod_7,
+                                         GAM6 = gam_model,
+                                         GBM6 = fit_gbm_mod_6,
+                                         GBM7 = fit_gbm_mod_7,
+                                         GBMTuned = fit_gbm_tune,
+                                         Linear6 = mod_6_tune,
+                                         Linear7 = mod_7_tune
+)
+)
+
+timings <- concrete_model_compare$timings$Everything
+
+results_summary <- summary(concrete_model_compare)
+
+metrics <- as.data.frame(results_summary$statistics)
+
+timings_df <- data.frame(Time_Efficiency = timings)
+
+combined_df <- cbind(metrics, timings_df)
+
+combined_df <- combined_df %>% select(MAE.Mean, RMSE.Mean, Rsquared.Mean, Time_Efficiency) %>% arrange(RMSE.Mean)
+
+combined_df %>%
+  ggplot(aes(x = RMSE.Mean, y = Time_Efficiency, label = rownames(combined_df))) +
+  geom_point(color = 'darkblue', size = 2) +
+  geom_text(check_overlap = FALSE, color = "red", size = 2.7, hjust = -0.1, vjust = 0.5) +
+  labs(
+    y = "Time Efficiency (In Seconds)",
+    title = "South Dakota Model Performance Based On Time Efficiency Per Model",
+    x = "RMSE"
+  )  +
+  scale_x_continuous(limits = c(0.12, 0.30), breaks = seq(0.12, 0.30, by = 0.025)) +
+  
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"))
+
+
+```
+
+```{r, include = F}
+
+# arkansas <- mental %>% filter(State.Abbreviation == "AR" & !Name == "Arkansas")
+
+set.seed(2811)
+train <- arkansas |> 
+  slice_sample(prop = 0.8)
+test <- arkansas |> 
+  anti_join(train)
+
+my_ctrl <- trainControl(method = 'repeatedcv', number = 5)
+metric_acc <- "RMSE"
+
+scaler <- train %>% select(where(is.numeric), -Poor.Mental.Health.Days.raw.value) |> scale()
+train <- train |> select(Poor.Mental.Health.Days.raw.value) |> bind_cols(scaler)
+
+mod6 <- lm(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value
+           
+           
+           , data = train)
+
+mod_6_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                    data = train,
+                    method = 'lm',
+                    preProcess = c("center", "scale"),
+                    metric = metric_acc,
+                    trControl = my_ctrl)
+
+mod_7_tune <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                    data = train,
+                    method = 'lm',
+                    preProcess = c("center", "scale"),
+                    metric = metric_acc,
+                    trControl = my_ctrl)
+enet_default_6 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                        data = arkansas,
+                        method = 'glmnet',
+                        preProcess = c("center", "scale"),
+                        tuneLength = 10,
+                        metric = metric_acc,
+                        trControl = my_ctrl)
+
+
+enet_default_7 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                        data = train,
+                        method = 'glmnet',
+                        preProcess = c("center", "scale"),
+                        tuneLength = 10,
+                        metric = metric_acc,
+                        trControl = my_ctrl)
+
+enet_default_complex <- train(Poor.Mental.Health.Days.raw.value ~ (Frequent.Mental.Distress.raw.value * Food.Insecurity.raw.value) + 
+                                (Food.Insecurity.raw.value * Poor.Physical.Health.Days.raw.value * Poor.or.Fair.Health.raw.value * Physical.Inactivity.raw.value * Frequent.Mental.Distress.raw.value) + (Population.raw.value * Food.Insecurity.numerator),
+                              data = train,
+                              method = 'glmnet',
+                              preProcess = c("center", "scale"),
+                              tuneLength = 10,
+                              metric = metric_acc,
+                              trControl = my_ctrl)
+
+set.seed(3231)
+
+rf_mod_6 <- caret::train(
+  Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value ,
+  data = train,
+  method = 'rf',
+  metric = metric_acc,
+  trControl = my_ctrl,
+  importance = TRUE
+)
+
+
+set.seed(3231)
+
+rf_mod_7 <- caret::train(
+  Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+  data = train,
+  method = 'rf',
+  metric = metric_acc,
+  trControl = my_ctrl,
+  importance = TRUE
+)
+
+set.seed(12341)
+fit_gbm_mod_6 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                       data = train,
+                       method = "gbm",
+                       metric = metric_acc,
+                       trControl = my_ctrl,
+                       verbose=FALSE)
+
+set.seed(12341)
+fit_gbm_mod_7 <- train(Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value + Excessive.Drinking.raw.value + Broadband.Access.raw.value + X..Asian.raw.value + Social.Associations.raw.value,
+                       data = train,
+                       method = "gbm",
+                       metric = metric_acc,
+                       trControl = my_ctrl,
+                       verbose=FALSE)
+
+gbm_grid <- expand.grid(n.trees = c(10, 50, 100, 150, 200, 300, 400, 500),
+                        shrinkage = c(0.01, 0.05, 0.1),
+                        interaction.depth = fit_gbm_mod_6$bestTune$interaction.depth,
+                        n.minobsinnode = fit_gbm_mod_6$bestTune$n.minobsinnode)
+
+set.seed(12341)
+fit_gbm_tune <- train( Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value,
+                       data = train,
+                       method = "gbm",
+                       metric = metric_acc,
+                       tuneGrid = gbm_grid,
+                       trControl = my_ctrl,
+                       verbose=FALSE)
+
+set.seed(3819)  # for reproducibility
+gam_model <- train(
+  Poor.Mental.Health.Days.raw.value ~  Frequent.Mental.Distress.raw.value + Adult.Smoking.raw.value + Physical.Inactivity.raw.value + Adult.Obesity.raw.value, 
+  data = train,
+  method = "gam",               
+  preProcess = c("center", "scale"),  
+  trControl = my_ctrl
+)
+
+concrete_model_compare <- resamples(list(Elastic6 = enet_default_6,
+                                         Elastic7 = enet_default_7,
+                                         RF6 = rf_mod_6,
+                                         RF7 = rf_mod_7,
+                                         GAM6 = gam_model,
+                                         GBM6 = fit_gbm_mod_6,
+                                         GBM7 = fit_gbm_mod_7,
+                                         GBMTuned = fit_gbm_tune,
+                                         Linear6 = mod_6_tune,
+                                         Linear7 = mod_7_tune
+)
+)
+
+
+timings <- concrete_model_compare$timings$Everything
+
+results_summary <- summary(concrete_model_compare)
+
+metrics <- as.data.frame(results_summary$statistics)
+
+timings_df <- data.frame(Time_Efficiency = timings)
+
+combined_df <- cbind(metrics, timings_df)
+
+combined_df <- combined_df %>% select(MAE.Mean, RMSE.Mean, Rsquared.Mean, Time_Efficiency) %>% arrange(RMSE.Mean)
+```
+
+```{r}
+combined_df %>%
+  ggplot(aes(x = RMSE.Mean, y = Time_Efficiency, label = rownames(combined_df))) +
+  geom_point(color = 'darkblue', size = 2) +
+  geom_text(check_overlap = FALSE, color = "red", size = 2.7, hjust = -0.1, vjust = 0.5) +
+  labs(
+    y = "Time Efficiency (In Seconds)",
+    title = "Arkansas Model Performance Based On Time Efficiency Per Model",
+    x = "RMSE"
+  ) +
+  
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, 
+                                  face = "bold"))
+
+```
+
+## Works Cited
+CDC. (2024, April 16). About Mental Health 
+
+Kondirolli, F., & Sunder, N. (2022). Mental health effects of education. Health Economics
+
+Litten, R. Z., Kwako, L. E., & Gardner, M. B. (2024, February 27). The basics: Defining how much alcohol is too much. National Institute on Alcohol Abuse and Alcoholism
+
+Stringer, H. (2024, January 1). Mental health care is in high demand. Psychologists are leveraging tech and peers to meet the need. American Psychological Association
+
+University of Wisconsin Population Health Institute. (n.d.). About Us. County Health Rankings & Roadmaps
+
+World Health Organization. (2023, October 20). Mental Health of Older Adults
