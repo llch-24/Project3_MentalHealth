@@ -444,6 +444,10 @@ Adult Obesity
 
 Our conclusion is further supported by our state-wise analysis, where we hone in on South Dakota and Arkansas to confirm that these variables continue to be the best predictors of poor mental health days. 
 
+Notably, variables such as smoking and drinking are negatively correlated with our response variable of Poor Mental Health Days. We believe this could point to a greater issue, which we have touched upon briefly earlier in this report—these substances are being used as vices, avenues through which individuals can find relief from their mental health and its causes. These trends raise several important points for consideration. Firstly, the negative correlation does not imply that smoking and drinking improve mental health. Rather, we believe it suggests that individuals with poor mental health may resort to these behaviors as coping mechanisms. Secondly, these results and the context by which they are surrounded (studies show that those with poor mental health often turn to substances to relieve everyday symptoms) indicate a need for comprehensive mental care that not only addresses symptoms, but other lifestyle choices that might make an individual feel as if they are happier, but which truthfully does more harm than good. Interventions should focus on providing healthier coping mechanisms and reducing reliance on substances such as alcohol and tobacco. This could include increased access to mental health services, community support programs, and public health campaigns that promote mental well-being and educate on the risks of substance abuse. 
+
+By understanding and addressing the root causes of poor mental health, we can develop more effective interventions that promote overall well-being and reduce reliance on harmful substances.
+
 ### Limitations
 The first limitation we encountered is that we cannot compare across states due to differing data collection methods, which limits our ability to draw consistent and reliable conclusions about mental health trends on a state-by-state basis. Inconsistencies in survey techniques, population coverage, and reporting standards introduce biases and errors, making it challenging to directly compare results from different states. As a result, our ability to identify and analyze state-specific factors influencing mental health outcomes is compromised. To address this, we built a model using entire US data as opposed to state or county data for a more uniform approach. However, this broader model may overlook important local variations, further highlighting the need for standardized data collection practices across states to enhance the accuracy and applicability of our findings.
 
@@ -473,7 +477,7 @@ library(dplyr)
 library(reshape2)
 
 csv <- "Final_Report_Copy.csv"
-mental <- read.csv(csv, header = TRUE)
+mental <- read.csv(csv, header = T)
 
 ### Clean data columns
 mental %>% clean_names()
@@ -1015,3 +1019,6 @@ Stringer, H. (2024, January 1). Mental health care is in high demand. Psychologi
 University of Wisconsin Population Health Institute. (n.d.). About Us. County Health Rankings & Roadmaps
 
 World Health Organization. (2023, October 20). Mental Health of Older Adults
+
+Download:
+https://www.kaggle.com/datasets/justinmustaine/continental-us-counties-2022
